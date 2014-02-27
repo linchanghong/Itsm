@@ -1,0 +1,136 @@
+package com.sccl.serviceManager.knowledgeManager.api;
+
+import java.text.ParseException;
+import java.util.List;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import org.springframework.flex.remoting.RemotingDestination;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.internal.StringMap;
+import com.google.gson.reflect.TypeToken;
+import com.sccl.flow.common.FlowTools;
+import com.sccl.flow.vo.DataInteraction;
+import com.sccl.framework.common.tools.StaticMethods;
+import com.sccl.serviceManager.bugManager.entity.UserApplyAdd;
+import com.sccl.serviceManager.knowledgeManager.entity.KnowledgeInfo;
+import com.sccl.serviceManager.knowledgeManager.service.IKnowledgeInfoService;
+import com.sun.jersey.api.core.InjectParam;
+
+@SuppressWarnings("all")
+@RemotingDestination
+@Component("knowledgeManagerAPI")
+@Path(value = "/serviceManager/knowledgeManager")
+public class KnowledgeManagerAPI {
+	
+	@InjectParam private IKnowledgeInfoService knowledgeInfoService;
+	
+	
+	/**
+	 * 添加
+	 * @param KnowledgeManagerAPI
+	 * @param knowledgeInfoJson
+	 * @return -2保存数据失败 -1 后台异常 0请建Model 1成功
+	 */
+	@Transactional
+	@POST
+	@Path(value = "/addKnowledgeInfo")
+	public String addKnowledgeInfo(String knowledgeInfoJson){
+//		return knowledgeInfoService.addKnowledgeInfo(knowledgeInfoJson);
+		Gson gson = StaticMethods.getDateGson();
+		Long type = (long) -2;
+		KnowledgeInfo knowledgeInfo=null;
+		
+		try {
+			knowledgeInfo = gson.fromJson(knowledgeInfoJson, KnowledgeInfo.class);
+            String compId = knowledgeInfo.getPublishStaff().companyID.toString().trim();
+            String personId = knowledgeInfo.getPublishStaff().personId.toString().trim();
+            
+            type = knowledgeInfoService.addKnowledgeInfo(knowledgeInfo, compId, personId);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        
+        DataInteraction di = new DataInteraction();
+        di.setType(type.intValue());
+        return gson.toJson(di);
+	}
+	
+	@Transactional
+	@POST
+	@Path(value = "/addKnowledgeInfos")
+	public String addKnowledgeInfos(String knowledgeInfosJson){
+		return knowledgeInfoService.addKnowledgeInfos(knowledgeInfosJson);
+	}
+	
+	@Transactional
+	@POST
+	@Path(value = "/updateKnowledgeInfo")
+	public Long updateKnowledgeInfo(String knowledgeInfoJson){
+		return knowledgeInfoService.updateKnowledgeInfo(knowledgeInfoJson);
+	}
+	
+	@Transactional
+	@POST
+	@Path(value = "/updateKnowledgeInfos")
+	public String updateKnowledgeInfos(String knowledgeInfosJson){
+		return knowledgeInfoService.updateKnowledgeInfos(knowledgeInfosJson);
+	}
+	
+	@DELETE
+	@Transactional
+	@Path(value = "/deleteKnowledgeInfoById/id/{knowledgeInfoId}")
+	public String deleteKnowledgeInfoById(@PathParam(value = "knowledgeInfoId") String knowledgeInfoId){
+		return knowledgeInfoService.deleteKnowledgeInfoById(knowledgeInfoId);
+	}
+	
+	@DELETE
+	@Transactional
+	@Path(value = "/deleteKnowledgeInfoByIds/ids/{knowledgeInfoIds}")
+	public String deleteKnowledgeInfoByIds(@PathParam(value = "knowledgeInfoIds") String knowledgeInfoIds){
+		return knowledgeInfoService.deleteKnowledgeInfoByIds(knowledgeInfoIds);
+	}
+	
+	@GET
+	@Path(value = "/findKnowledgeInfoById/id/{knowledgeInfoId}")
+	@Produces(value = {"application/json"})
+	public String findKnowledgeInfoById(@PathParam(value = "knowledgeInfoId") String knowledgeInfoId){
+		return knowledgeInfoService.findKnowledgeInfoById(knowledgeInfoId);
+	}
+	
+	@GET
+	@Path(value = "/findKnowledgeInfoByUserId/id/{userId}")
+	@Produces(value = {"application/json"})
+	public String findKnowledgeInfoByUserId(@PathParam(value = "userId") String userId){
+		return knowledgeInfoService.findKnowledgeInfoByUserId(userId);
+	}
+	
+	@Transactional
+	public String deleteKnowledgeInfo(String knowledgeInfoId){
+		return knowledgeInfoService.deleteKnowledgeInfo(knowledgeInfoId);
+	}
+	
+	@Transactional
+	public String examineKnowledgeInfo(String knowledgeInfoId,String examine){
+		return knowledgeInfoService.examineKnowledgeInfo(knowledgeInfoId,examine);
+	}
+	
+	@GET
+    @Path(value = "/findAllKnowledgeInfoPage/query/{searchInfo}/{pageNum}/{lines}/{isCount}")
+    @Produces(value = {"application/json"})
+	public String findAllKnowledgeInfoPage(@PathParam(value = "first") int first,
+			@PathParam(value = "size") int size, @PathParam(value = "isCount") boolean isCount){
+		return knowledgeInfoService.findAllKnowledgeInfoPage(first,size,isCount);
+	}
+	
+}
+

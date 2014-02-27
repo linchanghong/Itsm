@@ -1,0 +1,193 @@
+/**
+ * @Title: SearchInfoDTO.java
+ * @Package com.sccl.serviceManager.bugManager.dto
+ * @Description: TODO-
+ * @author Howie_Mark   
+ * @date 2013-8-18 下午7:43:27
+ * @version:V1.0 
+ */
+package com.sccl.serviceManager.bugManager.dto;
+
+/**
+ * @ProjectName:Itsm
+ * @Package:com.sccl.serviceManager.bugManager.dto.SearchInfoDTO.java
+ * @ClassName: SearchInfoDTO
+ * @Description: TODO-
+ * @author:Howie_Mark
+ * @UpdateUser:blue_sky
+ * @UpdateDate:2013-8-18
+ * @UpdateRemark:[The content of this revision]
+ * @See:[Related classes and methods]
+ * @Since:[Product template version]
+ * @date 2013-8-18 下午7:43:27
+ * @Version:v1.0
+ */
+public class SearchInfoDTO {
+
+    /**
+     * 请求单编号
+     */
+    private String code;
+    /**
+     * 所属系统
+     */
+    private int system;
+    /**
+     * 主题摘要
+     */
+    private String theme;
+    /**
+     * 重要程度
+     */
+    private int degree;
+    /**
+     * 影响范围
+     */
+    private int range;
+    /**
+     * 报告人
+     */
+    private String sponsor;
+    /**
+     * 状态
+     */
+    private int status;
+    /**
+     * 待定
+     */
+    private String other;
+    /**
+     * 种类
+     */
+    private int flag = 2;
+    
+
+    public SearchInfoDTO(){}
+
+    /**
+     * @return the code
+     */
+    public String getCode() {
+        return code;
+    }
+
+    /**
+     * @param code the code to set
+     */
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    /**
+     * @return the system
+     */
+    public int getSystem() {
+        return system;
+    }
+
+    /**
+     * @param system the system to set
+     */
+    public void setSystem(int system) {
+        this.system = system;
+    }
+
+    /**
+     * @return the theme
+     */
+    public String getTheme() {
+        return theme;
+    }
+
+    /**
+     * @param theme the theme to set
+     */
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
+
+    /**
+     * @return the degree
+     */
+    public int getDegree() {
+        return degree;
+    }
+
+    /**
+     * @param degree the degree to set
+     */
+    public void setDegree(int degree) {
+        this.degree = degree;
+    }
+
+    /**
+     * @return the range
+     */
+    public int getRange() {
+        return range;
+    }
+
+    /**
+     * @param range the range to set
+     */
+    public void setRange(int range) {
+        this.range = range;
+    }
+
+    /**
+     * @return the sponsor
+     */
+    public String getSponsor() {
+        return sponsor;
+    }
+
+    /**
+     * @param sponsor the sponsor to set
+     */
+    public void setSponsor(String sponsor) {
+        this.sponsor = sponsor;
+    }
+
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    /**
+     * @return the other
+     */
+    public String getOther() {
+        return other;
+    }
+
+    /**
+     * @param other the other to set
+     */
+    public void setOther(String other) {
+        this.other = other;
+    }
+    
+    /**
+     * @return the flag
+     */
+    public int getFlag() {
+        return flag;
+    }
+
+    /**
+     * @param flag the flag to set
+     */
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+    
+}

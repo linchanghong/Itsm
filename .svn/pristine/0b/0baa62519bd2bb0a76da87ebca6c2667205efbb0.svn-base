@@ -1,0 +1,324 @@
+/**
+ * @Title: HomePage.java
+ * @Package com.sccl.serviceManager.bugManager.entity
+ * @Description: TODO-
+ * @author Howie_Mark   
+ * @date 2013-9-3 上午9:47:23
+ * @version:V1.0 
+ */
+package com.sccl.serviceManager.bugManager.entity;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.sccl.framework.entity.ConstDetail;
+import com.sccl.framework.entity.TableEntity;
+
+/**
+ * @ProjectName:Itsm
+ * @Package:com.sccl.serviceManager.bugManager.entity.HomePage.java
+ * @ClassName: HomePage
+ * @Description: TODO-
+ * @author:Howie_Mark
+ * @UpdateUser:blue_sky
+ * @UpdateDate:2013-9-3
+ * @UpdateRemark:[The content of this revision]
+ * @See:[Related classes and methods]
+ * @Since:[Product template version]
+ * @date 2013-9-3 上午9:47:23
+ * @Version:v1.0
+ */
+@XmlRootElement
+//@Scope("prototype")
+@Entity
+@Table(name = "T_USER_APPLY", schema = "ITSM")
+public class HomePage extends TableEntity implements Serializable {
+
+    /**
+     * @Description: TODO-
+     */
+    private static final long serialVersionUID = 7417281289001176797L;
+
+    /**
+     * 主键
+     */
+    private Long applyId;
+    /**
+     * 用户请求单编号
+     */
+    private String userApplyCode = "";
+    /**
+     * 请求类型1- 问题 2-bug 3-需求
+     */
+    private Integer applyType;
+    /**
+     * 提出请求的具体用户
+     */
+    private User sponsor;
+    /**
+     * 请求发起时间
+     */
+    private Date applyStartDate;
+    /**
+     * 期望解决时间
+     */
+    private Date applyEndDate;
+    /**
+     * 请求的紧急程度
+     */
+    private ReplyLevel urgent;
+    /**
+     * 问题可能影响的范围
+     */
+    private ConstDetail range;
+    /**
+     * 请求对应的业务系统
+     */
+    private SupportSystem belongSystem;
+//    /**
+    /**
+     * 受理人
+     */
+    private User replyer;
+    /**
+     * 请求主题摘要
+     */
+    private String applyTitle = "";
+    /**
+     * 请求单状态
+     */
+    private Short applyStatus;
+    /**
+     * 文档集合
+     */
+    /**
+     * 是否删除：0-未删除；1-已删除
+     */
+    private Integer DR = 1;
+    
+    /**
+     * 请求单状态描述
+     */
+    public String applyStatusStr = "未提交";
+    
+    
+    /**
+     * HomePage
+     * @Description:无参构造
+     */
+    public HomePage() {
+        super();
+    }
+    
+    
+    
+    /**
+     * @return the applyId
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GEN_USER_APPLY")
+    @SequenceGenerator(name = "GEN_USER_APPLY", sequenceName = "SEQ_USERAPPLY", allocationSize = 1)
+    @Column(name = "USER_APPLY_ID", nullable = false)
+    public Long getApplyId() {
+        return applyId;
+    }
+    /**
+     * @param applyId the applyId to set
+     */
+    public void setApplyId(Long uid) {
+        this.applyId = uid;
+    }
+    /**
+     * @return the UserApplyCode
+     */
+    @Column(name = "USER_APPLY_CODE")
+    public String getUserApplyCode() {
+        return userApplyCode;
+    }
+    /**
+     * @param UserApplyCode the UserApplyCode to set
+     */
+    public void setUserApplyCode(String UserApplyCode) {
+        this.userApplyCode = UserApplyCode;
+    }
+    /**
+     * @return the applyType
+     */
+    @Column(name = "APPLY_TYPE")
+    public Integer getApplyType() {
+        return applyType;
+    }
+    /**
+     * @param applyType the applyType to set
+     */
+    public void setApplyType(Integer applyType) {
+        this.applyType = applyType;
+    }
+    
+
+    /**
+     * @return the sponsor
+     */
+    @ManyToOne
+    @JoinColumn(name="SPONSOR")
+    public User getSponsor() {
+        return sponsor;
+    }
+
+    /**
+     * @param sponsor the sponsor to set
+     */
+    public void setSponsor(User sponsor) {
+        this.sponsor = sponsor;
+    }
+
+    /**
+     * @return the replyer
+     */
+    @ManyToOne
+    @JoinColumn(name="REPLYER")
+    public User getReplyer() {
+        return replyer;
+    }
+
+    /**
+     * @param replyer the replyer to set
+     */
+    public void setReplyer(User replyer) {
+        this.replyer = replyer;
+    }
+
+    /**
+     * @return the applyStartDate
+     */
+    @Column(name = "APPLY_START_DATE")
+    @Temporal(TemporalType.DATE)
+    public Date getApplyStartDate() {
+        return applyStartDate;
+    }
+    /**
+     * @param applyStartDate the applyStartDate to set
+     */
+    public void setApplyStartDate(Date applyStartDate) {
+        this.applyStartDate = applyStartDate;
+    }
+    /**
+     * @return the applyEndDate
+     */
+    @Column(name = "APPLY_END_DATE")
+    @Temporal(TemporalType.DATE)
+    public Date getApplyEndDate() {
+        return applyEndDate;
+    }
+    /**
+     * @param applyEndDate the applyEndDate to set
+     */
+    public void setApplyEndDate(Date applyEndDate) {
+        this.applyEndDate = applyEndDate;
+    }
+    /**
+     * @return the urgent
+     */
+    @ManyToOne
+    @JoinColumn(name="URGENT")
+    public ReplyLevel getUrgent() {
+        return urgent;
+    }
+    /**
+     * @param urgent the urgent to set
+     */
+    public void setUrgent(ReplyLevel urgent) {
+        this.urgent = urgent;
+    }
+    /**
+     * @return the range
+     */
+    @ManyToOne
+    @JoinColumn(name="RANGE")
+    public ConstDetail getRange() {
+        return range;
+    }
+    /**
+     * @param range the range to set
+     */
+    public void setRange(ConstDetail range) {
+        this.range = range;
+    }
+    /**
+     * @return the belongSystem
+     */
+    
+    /**
+     * @return the belongSystem
+     */
+    @ManyToOne
+    @JoinColumn(name="BELONGS_SYSTEM")
+    public SupportSystem getBelongSystem() {
+        return belongSystem;
+    }
+
+    /**
+     * @param belongSystem the belongSystem to set
+     */
+    public void setBelongSystem(SupportSystem belongSystem) {
+        this.belongSystem = belongSystem;
+    }
+    
+    /**
+     * @return the applyTitle
+     */
+    @Column(name = "APPLY_TITLE")
+    public String getApplyTitle() {
+        return applyTitle;
+    }
+    /**
+     * @param applyTitle the applyTitle to set
+     */
+    public void setApplyTitle(String applyTitle) {
+        this.applyTitle = applyTitle;
+    }
+    
+    /**
+     * @return the applyStatus
+     */
+    @Column(name="APPLY_STATUS")
+    public Short getApplyStatus() {
+        return applyStatus;
+    }
+
+    /**
+     * @param applyStatus the applyStatus to set
+     */
+    public void setApplyStatus(Short applyStatus) {
+        this.applyStatus = applyStatus;
+    }
+    
+    /**
+     * @return the DR
+     */
+    @Column(name = "DR")
+    public Integer getDR() {
+        return DR;
+    }
+
+    /**
+     * @param DR the DR to set
+     */
+    public void setDR(Integer DR) {
+        this.DR = DR;
+    }
+    
+}

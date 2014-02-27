@@ -1,0 +1,54 @@
+package com.sccl.serviceManager.common.selectWindow.user.service;
+
+import java.util.List;
+
+public interface ISelectUserService {
+	
+    /**
+     * 
+     * @Title: queryUsersByNameLike
+     * @Description:根据用户输入模糊查询
+     * @param companyid
+     * @param userName
+     * @param first
+     * @param size
+     * @param isCount
+     * @return 
+     * @retunType:List<Object>      返回类型
+     * @throws:
+     */
+    public List<Object> queryUsersByNameLike(int companyid, String userName, int first, int size,
+            boolean isCount);
+    
+    /**
+     * 
+     * @Title: findUsers
+     * @Description:根据部门Id查询用户
+     * @param depid
+     * @param first
+     * @param size
+     * @param isCount
+     * @return 
+     * @retunType:List<Object>      返回类型
+     * @throws:
+     */
+    public List<Object> findUsers(String depid, int first, int size,
+            boolean isCount);
+    
+    /**
+     * 
+     * @Title: findUsers
+     * @Description:根据部门Id查询用户,且不包含某一用户
+     * @param depid
+     * @param userID
+     * @param first
+     * @param size
+     * @param isCount
+     * @return 
+     * @retunType:List<Object>      返回类型
+     * @throws:
+     */
+    public List<Object> findUsersWithoutID(String depid, int userID, int first, int size,
+            boolean isCount);
+    
+}

@@ -1,0 +1,205 @@
+/**
+ * @Title: AnalyzesServiceImpl.java
+ * @Package com.sccl.analyzes.service
+ * @Description: TODO-
+ * @author Howie_Mark   
+ * @date 2013-9-15 下午3:37:49
+ * @version:V1.0 
+ */
+package com.sccl.analyzes.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
+import com.google.gson.Gson;
+import com.sccl.analyzes.dto.ViewStatistic4problem;
+import com.sccl.analyzes.dto.ViewStatistic4workload;
+import com.sccl.framework.DataManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @ProjectName:Itsm
+ * @Package:com.sccl.analyzes.service.AnalyzesServiceImpl.java
+ * @ClassName: AnalyzesServiceImpl
+ * @Description: TODO-
+ * @author:Howie_Mark
+ * @UpdateUser:blue_sky
+ * @UpdateDate:2013-9-15
+ * @UpdateRemark:[The content of this revision]
+ * @See:[Related classes and methods]
+ * @Since:[Product template version]
+ * @date 2013-9-15 下午3:37:49
+ * @Version:v1.0
+ */
+@Component("analyzesService")
+@SuppressWarnings("unchecked")
+public class AnalyzesServiceImpl implements IAnalyzesService {
+    
+    /**
+     * 成功
+     */
+    private static final String SUCCESS = "1";
+    
+    /**
+     * 失败
+     */
+    private static final String ERROR = "0";
+
+    private DataManager dataManager;
+
+    public DataManager getDataManager() {
+        return dataManager;
+    }
+
+    @Resource(name = "dataManager")
+    public void setDataManager(DataManager dataManager) {
+        this.dataManager = dataManager;
+    }
+
+    /* 
+     * <p>Title: initWorkloadDatas</p>
+     * <p>Description: </p>
+     * @param queryMonth
+     * @param lines
+     * @param pageNum
+     * @param isCount
+     * @param orderBy
+     * @return
+     * @see com.sccl.analyzes.service.IAnalyzesService#initWorkloadDatas(int, int, int, boolean, java.lang.String)
+     */
+    @Override
+    public String initWorkloadDatas(int queryMonth, int lines, int pageNum,
+            boolean isCount, String orderBy) {
+        
+        String sql = "select t.employeeid, t.employeename, count(t.bug) bugCount, " +
+        		"count(t.problem) problemCount " +
+        		"from view_statistic4workload t " +
+        		"where completemonth = "+ queryMonth +" " +
+        		"group by t.employeeid, t.employeename ";
+        
+        if(orderBy != null && !"".equals(orderBy.trim()))
+            sql += "order by " + orderBy.toUpperCase();
+        
+        List<Object> lst = new ArrayList<Object>();
+        
+        try {
+            List<ViewStatistic4workload> workloads 
+            = (List<ViewStatistic4workload>) dataManager.nativeQuery(sql, ViewStatistic4workload.class);
+        
+        int count = 0;
+        
+        if(workloads != null)
+            count = workloads.size();
+        int end = pageNum + lines;
+        
+        if (workloads != null && count > 0) {
+
+            if (count >= end) {
+
+                workloads.subList(pageNum, end);
+            } else {
+                workloads.subList(pageNum, count);
+            }
+        }else {
+            return ERROR;
+        }
+        
+        lst.add(workloads);
+        if(isCount)
+            lst.add(count);
+        
+        return new Gson().toJson(lst);
+        } catch (Exception e) {
+            return ERROR;
+        }
+        
+    }
+
+    /* 
+     * <p>Title: initProblemDatas</p>
+     * <p>Description: </p>
+     * @param queryMonth
+     * @param lines
+     * @param pageNum
+     * @param isCount
+     * @param orderBy
+     * @return
+     * @see com.sccl.analyzes.service.IAnalyzesService#initProblemDatas(int, int, int, boolean, java.lang.String)
+     */
+    @Override
+    public String initProblemDatas(int queryMonth, int lines, int pageNum,
+            boolean isCount, String orderBy) {
+       
+        //select t0.sysId sysId, t0.sysName sysName, t1.submitＣount submitCount, 
+        //t3.acceptＣount acceptCount, t5.completedＣount completedCount 
+        //from view_statistic4problem t0 left join (select t.sysid sysＩd, t.sysname sysＮame, count(t.submit) submitＣount 
+        //from view_statistic4problem t where t.submitmonth = 9 group by t.sysid, t.sysname) t1 on t0.sysid = t1.sysＩd 
+        //left join (select t2.sysid sysＩd, t2.sysname sysＮame, count(t2.accept) acceptＣount 
+        //from view_statistic4problem t2 where t2.acceptmonth = 9 group by t2.sysid, t2.sysname) t3 on t1.sysＩd = t3.sysＩd 
+        //left join (select t4.sysid sysＩd, t4.sysname sysＮame, count(t4.completed) completedＣount 
+        //from view_statistic4problem t4 where t4.completedmonth = 9 group by t4.sysid, t4.sysname) t5 
+        //on t1.sysＩd = t5.sysＩd order by sysId
+        
+        String sql = "select t1.sysＩd sysId, t1.sysＮame sysName, t1.submitＣount submitCount, " +
+        		"t3.acceptＣount acceptCount, t5.completedＣount completedCount " +
+        "from " +
+        "(select t.sysid sysＩd, t.sysname sysＮame, count(t.submit) submitＣount " +
+        "from view_statistic4problem t " +
+        "where t.submitmonth = " + queryMonth + " " +
+        "group by t.sysid, t.sysname) t1 " + 
+        "left join " +
+        "(select t2.sysid sysＩd, t2.sysname sysＮame, count(t2.accept) acceptＣount " +
+        "from view_statistic4problem t2 " +
+        "where t2.acceptmonth = " + queryMonth + " " +
+        "group by t2.sysid, t2.sysname) t3 " +
+        "on t1.sysＩd = t3.sysＩd " +
+        "left join " +
+        "(select t4.sysid sysＩd, t4.sysname sysＮame, count(t4.completed) completedＣount " +
+        "from view_statistic4problem t4 " +
+        "where t4.completedmonth = " + queryMonth + " " +
+        "group by t4.sysid, t4.sysname) t5 " +
+        "on t1.sysＩd = t5.sysＩd ";
+        
+        if(orderBy != null && !"".equals(orderBy.trim()))
+            sql += "order by " + orderBy.toUpperCase();
+        
+        List<Object> lst = new ArrayList<Object>();
+        
+        try {
+            List<ViewStatistic4problem> problems 
+            = (List<ViewStatistic4problem>) dataManager.nativeQuery(sql, ViewStatistic4problem.class);
+        
+        int count = 0;
+        
+        if(problems != null)
+            count = problems.size();
+        int end = pageNum + lines;
+        
+        if (problems != null && count > 0) {
+
+            if (count >= end) {
+
+                problems.subList(pageNum, end);
+            } else {
+                problems.subList(pageNum, count);
+            }
+        } else {
+            return ERROR;
+        }
+        
+        lst.add(problems);
+        if(isCount)
+            lst.add(count);
+        
+        return new Gson().toJson(lst);
+        } catch (Exception e) {
+            return ERROR;
+        }
+        
+    }
+    
+    
+}

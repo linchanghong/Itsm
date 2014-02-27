@@ -1,0 +1,1069 @@
+package com.sccl.serviceManager.demandManager.service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sccl.flow.common.FlowTools;
+import com.sccl.framework.DataManager;
+import com.sccl.framework.common.tools.StaticMethods;
+import com.sccl.framework.entity.Attachment;
+import com.sccl.framework.entity.ConstDetail;
+import com.sccl.framework.service.log.Log;
+import com.sccl.serviceManager.bugManager.dto.SearchInfoDTO;
+import com.sccl.serviceManager.bugManager.entity.HomePage;
+import com.sccl.serviceManager.bugManager.entity.UserApplyAdd;
+import com.sccl.serviceManager.demandManager.entity.Demand4Flow;
+import com.sccl.serviceManager.demandManager.entity.DemandAssess;
+import com.sccl.serviceManager.demandManager.entity.SubDemand;
+import com.sccl.serviceManager.demandManager.entity.SubDemand4Mod;
+import com.sccl.serviceManager.demandManager.entity.SubDemandHomePage;
+import com.sccl.serviceManager.util.BugManagerUtil;
+
+/**
+ * 
+ * @ProjectName:Itsm
+ * @Package:com.sccl.serviceManager.demandManager.service.DemandManagerServiceImpl.java
+ * @ClassName: DemandManagerServiceImpl
+ * @Description: TODO-
+ * @author:Howie_Mark
+ * @UpdateUser:blue_sky
+ * @UpdateDate:2013-9-27
+ * @UpdateRemark:[The content of this revision]
+ * @See:[Related classes and methods]
+ * @Since:[Product template version]
+ * @date 2013-9-27 上午11:41:46
+ * @Version:v1.0
+ */
+@Component("demandManagerService")
+@SuppressWarnings("unchecked")
+public class DemandManagerServiceImpl implements IDemandManagerService {
+
+    /**
+     * 成功
+     */
+    private static final String SUCCESS = "1";
+
+    /**
+     * 失败
+     */
+    private static final String ERROR = "0";
+
+    private static final int ERROR_NUM = -1;
+
+    private DataManager dataManager;
+
+    public DataManager getDataManager() {
+        return dataManager;
+    }
+
+    @Resource(name = "dataManager")
+    public void setDataManager(DataManager dataManager) {
+        this.dataManager = dataManager;
+    }
+
+    /*
+     * <p>Title: initSubDemanHomePageFast</p> <p>Description: </p>
+     * 
+     * @param lines
+     * 
+     * @param pageNum
+     * 
+     * @param isCount
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * initSubDemanHomePageFast(int, int, boolean)
+     */
+    @Override
+    public String initSubDemanHomePageFast(int lines, int pageNum,
+            boolean isCount) {
+        try {
+            List<Object> reList = new ArrayList<Object>();
+            //查询出全部子需求单方法是querySubDemandsFastExactly()
+            reList.add(querySubDemandsByPageFastExactly(lines, pageNum));
+            if(isCount)
+                reList.add(getPageCount());
+            String string = StaticMethods.getDateGson().toJson(reList);
+            return string;
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+
+//    /**
+//     * @Title: querySubDemandsFastExactly
+//     * @Description:查询所有的子需求
+//     * @return List<SubDemandHomePage> 返回类型
+//     * @throws
+//     */
+//    private List<SubDemandHomePage> querySubDemandsFastExactly() {
+//        try {
+//            List<SubDemandHomePage> applies = dataManager.createQuery(
+//                    "from SubDemandHomePage p where p.dr = 0 "
+//                            + " order by p.initDate desc",
+//                    SubDemandHomePage.class).getResultList();
+//            BugManagerUtil.loadingStatusDirection(applies);
+//            return applies;
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
+
+    /**
+     * @Title: querySubDemandsByPageFastExactly
+     * @Description:分页查询子需求
+     * @param lines
+     * @param pageNum
+     * @return List<SubDemandHomePage> 返回类型
+     * @throws
+     */
+    private List<SubDemandHomePage> querySubDemandsByPageFastExactly(int lines,
+            int pageNum) {
+        try {
+            List<SubDemandHomePage> applies = dataManager
+                    .createQuery(
+                            "from SubDemandHomePage p where p.dr = 0 "
+                                    + " order by p.userDemandId desc",
+                            SubDemandHomePage.class).setFirstResult(pageNum)
+                    .setMaxResults(lines).getResultList();
+            BugManagerUtil.loadingStatusDirection(applies);
+            return applies;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * @Title: getPageCount
+     * @Description:返回子需求请求单的总数
+     * @return Long 返回类型
+     * @throws
+     */
+    private Long getPageCount() {
+        try {
+            return dataManager.createQuery(
+                    "select count(p) from SubDemandHomePage p "
+                            + "where p.dr = 0 ", Long.class).getSingleResult();
+        } catch (Exception e) {
+            return Long.parseLong(ERROR);
+        }
+    }
+
+    /*
+     * <p>Title: addDemandUserApply</p> <p>Description: </p>
+     * 
+     * @param apply
+     * 
+     * @param compId
+     * 
+     * @param personId
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * addDemandUserApply
+     * (com.sccl.serviceManager.bugManager.entity.UserApplyAdd,
+     * java.lang.String, java.lang.String)
+     */
+    @Override
+    @Transactional
+    @Log
+    public Long addDemandUserApply(UserApplyAdd apply, String compId,
+            String personId) {
+        try {
+            // BugFlowTool tools = BugFlowTool.getInstence();
+            FlowTools tools = FlowTools.getInstence();
+            tools.setDataManager(dataManager);
+            Long oprtTypeID = Long.valueOf("3");
+            Long flowModelId = tools.getFlowModelId(oprtTypeID,
+                    Long.valueOf(compId));
+            if (flowModelId == -1) {
+                return (long) -1;
+            } else if (flowModelId == 0) {
+                return (long) 0;
+            } else {
+                // apply.setApplyId(Uid.getUidUtil().createUID());
+                apply.setUserApplyCode(new BugManagerUtil(dataManager)
+                        .createBugApplyCode(3));
+                if (apply.getApplyId() != null && apply.getApplyId() <= 0)
+                    apply.setApplyId(null);
+                dataManager.add(apply);
+                // BigInteger billID = new
+                // BigInteger(apply.getApplyId().trim());
+                Long billID = apply.getApplyId();
+                String flowTitle = "需求流程：" + apply.getApplyTitle();
+                tools.savaFlowInstence(oprtTypeID, flowModelId, billID,
+                        personId, flowTitle);
+            }
+            return apply.getApplyId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (long) -2;
+    }
+
+    /*
+     * <p>Title: showDemand4FlowByID</p> <p>Description: </p>
+     * 
+     * @param demandID
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * showDemand4FlowByID(java.lang.Long)
+     */
+    @Override
+    public String showDemand4FlowByID(Long demandID) {
+        try {
+            Demand4Flow demand = null;
+            if (demandID == null || demandID < 0l)
+                demandID = 0l;
+            demand = dataManager.findById(Demand4Flow.class, demandID);
+            if (demand != null) {
+                demand.attachments = getAttachmentsByUserApplyID(demandID);
+                // demand.subDemands =
+                // getSubDemandsByDemandID(demandID);
+            }
+            String string = StaticMethods.getDateGson().toJson(demand);
+            return string;
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+
+    // /**
+    // *
+    // * @Title: getSubDemandsByDemandID
+    // * @Description:通过主需求单的id查询出其所有需求服务单
+    // * @param demandID
+    // * @return List<SubDemand> 返回类型
+    // * @throws
+    // */
+    // private List<SubDemand> getSubDemandsByDemandID(Long demandID){
+    // try {
+    // List<SubDemand> subDemands =
+    // dataManager.createQuery(
+    // "from SubDemand a where a.userApplyId = " + demandID +
+    // " order by a.userDemandId desc",
+    // SubDemand.class).getResultList();
+    // return subDemands;
+    // } catch (Exception e) {
+    // return null;
+    // }
+    // }
+
+    /**
+     * 
+     * @Title: getAttachmentsByUserApplyID
+     * @Description:通过请求单ID查询其所有文档对象数据传输对象
+     * @param applyIDStr
+     * @return
+     * @retunType:List<Attachments> 返回类型
+     * @throws:
+     */
+    private List<Attachment> getAttachmentsByUserApplyID(Long applyIDStr) {
+        try {
+            List<Attachment> attachments = dataManager.createQuery(
+                    "from Attachment a where a.busDataId = '" + applyIDStr
+                            + "' order by a.uploadDate", Attachment.class)
+                    .getResultList();
+            return attachments;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /*
+     * <p>Title: judgeAllSubDemandsIsSubmit</p> <p>Description: </p>
+     * 
+     * @param demandID
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * judgeAnySubDemandsIsSubmit(java.lang.Long)
+     */
+    @Override
+    public short judgeAllSubDemandsIsSubmit(Long demandID) {
+        try {
+            String sqlString = "select count(t.user_demand_id) "
+                    + "from T_DEMANDS_PART t " + "where t.demand_status = 7 "
+                    + "and t.user_apply_id = " + demandID;
+
+            List lst = dataManager.createNativeQuery(sqlString).getResultList();
+
+            Short num = null;
+            if (lst != null && lst.size() > 0)
+                num = ((BigDecimal) lst.get(0)).shortValue();
+            if (num == null)
+                num = 0;
+            return num;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /*
+     * <p>Title: modifyDemand4DemandFlow</p> <p>Description: </p>
+     * 
+     * @param demand4Flow
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * modifyDemand4DemandFlow
+     * (com.sccl.serviceManager.demandManager.entity.Demand4Flow)
+     */
+    @Override
+    public String modifyDemand4DemandFlow(Demand4Flow demand4Flow) {
+        try {
+            if (demand4Flow.getApplyId() != null
+                    && demand4Flow.getApplyId() != 0) {
+                dataManager.update(demand4Flow);
+                return SUCCESS;
+            }
+            return ERROR;
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+
+    /*
+     * <p>Title: addSubDemandUserApply</p> <p>Description: </p>
+     * 
+     * @param apply
+     * 
+     * @param compId
+     * 
+     * @param personId
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * addSubDemandUserApply
+     * (com.sccl.serviceManager.demandManager.entity.SubDemand,
+     * java.lang.String, java.lang.String)
+     */
+    @Override
+    public Long addSubDemandUserApply(SubDemand4Mod apply, String compId,
+            String personId) {
+        try {
+            FlowTools tools = FlowTools.getInstence();
+            tools.setDataManager(dataManager);
+            Long oprtTypeID = Long.valueOf("6");
+            Long flowModelId = tools.getFlowModelId(oprtTypeID,
+                    Long.valueOf(compId));
+            if (flowModelId == -1) {
+                return (long) -1;
+            } else if (flowModelId == 0) {
+                return (long) 0;
+            } else {
+                // apply.setUserApplyCode(new
+                // BugManagerUtil(dataManager).createBugApplyCode(3));
+                if (apply.getUserDemandId() != null
+                        && apply.getUserDemandId() <= 0)
+                    apply.setUserDemandId(null);
+                dataManager.add(apply);
+                Long billID = apply.getUserDemandId();
+                String flowTitle = "子需求流程：" + apply.getDemandTitle();
+                tools.savaFlowInstence(oprtTypeID, flowModelId, billID,
+                        personId, flowTitle);
+            }
+            increaseSubDemandCount4Demand(apply.getUserApplyId());
+            return apply.getUserDemandId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (long) -2;
+    }
+
+    /** 修改并持久化主需求单的“子需求单总数”字段====只许成功 */
+    @Log
+    @Transactional
+    private String increaseSubDemandCount4Demand(Long demandID) {
+        String flag = ERROR;
+        try {
+            if (demandID != null && demandID > 0) {
+                String sql = "update t_user_apply t set t.SUB_DEMAND_COUNT = t.SUB_DEMAND_COUNT+1 where t.user_apply_id = "
+                        + demandID;
+                dataManager.createNativeQuery(sql).executeUpdate();
+                flag = SUCCESS;
+            }
+        } catch (Exception e) {
+            flag = ERROR;
+        }
+        if (ERROR.equals(flag))
+            increaseSubDemandCount4Demand(demandID);
+        return flag;
+    }
+
+    /*
+     * <p>Title: showSubDemandByID</p> <p>Description: </p>
+     * 
+     * @param subDemandID
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * showSubDemandByID(java.lang.Long)
+     */
+    @Override
+    public String showSubDemandByID(Long subDemandID) {
+        try {
+            SubDemand demand = null;
+            if (subDemandID == null || subDemandID < 0l)
+                subDemandID = -1l;
+            demand = dataManager.findById(SubDemand.class, subDemandID);
+            if (demand != null)
+                demand.attachments = getAttachmentsByUserApplyID(subDemandID);
+            String string = StaticMethods.getDateGson().toJson(demand);
+            return string;
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+
+    /*
+     * <p>Title: updateSubDemandStatusNoDataBack</p> <p>Description: </p>
+     * 
+     * @param subDemandID
+     * 
+     * @param status
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * updateSubDemandStatusNoDataBack(java.lang.Long, int)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String updateSubDemandStatusNoDataBack(Long subDemandID, int status) {
+        try {
+            if (subDemandID != null && subDemandID.intValue() > 0) {
+                String sql = "update T_DEMANDS_PART t set t.DEMAND_STATUS = "
+                            + status;
+                if (status > 1){
+                    if(status == 2)
+                        sql += " ";
+                    else if(status == 3)
+                        sql += ",t.real_develop_date = '' ";
+                    else if(status == 4)
+                        sql += ",t.real_utest_date = '' ";
+                    else if(status == 5)
+                        sql += ",t.real_ftest_date = '' ";
+                    else if(status == 6)
+                        sql += " ";
+                    else if(status == 7)
+                        increaseCountOfSon4Demand(subDemandID);
+                    else 
+                        sql += " ";
+                }
+                if (status == 1)
+                    sql += ",t.real_analysis_date = ''  ";
+                if(status == 0)
+                    sql += ", t.assigned_date = '' ";
+                
+                sql += " where t.USER_DEMAND_ID = " + subDemandID;
+                dataManager.createNativeQuery(sql).executeUpdate();
+                return SUCCESS;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+        return ERROR;
+    }
+    
+    /**
+     * 
+     * @Title: getUserApplyIDBySubDemandID
+     * @Description:当子需求结束时，应该增加主需求的子需求完成数
+     * @param subDemandID
+     * @return Long        返回类型
+     * @throws
+     */
+    private Long getUserApplyIDBySubDemandID(Long subDemandID){
+        try {
+            String sql = "select t.user_apply_id " +
+            		"from t_demands_part t " +
+            		"where t.user_demand_id = " + subDemandID;
+            return ((BigDecimal)dataManager
+                    .createNativeQuery(sql).getSingleResult()).longValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0l;
+        }
+    }
+    
+    /**
+     * 
+     * @Title: increaseCountOfSon4Demand
+     * @Description:当子需求结束时，应该增加主需求的子需求完成数
+     * @param subDemandID
+     * @return String        返回类型
+     * @throws
+     */
+    @Log
+    @Transactional
+    private String increaseCountOfSon4Demand(Long subDemandID){
+        try {
+            Long applyID = getUserApplyIDBySubDemandID(subDemandID);
+            String sql = "update t_user_apply t " +
+            		"set t.sub_demand_completed_count = " +
+            		"t.sub_demand_completed_count + 1 " +
+            		"where t.user_apply_id = "+ applyID;
+            dataManager.createNativeQuery(sql).executeUpdate();
+            return SUCCESS;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+    }
+
+    /*
+     * <p>Title: updateSubDemandUserApply</p> <p>Description: </p>
+     * 
+     * @param subDemandString
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * updateSubDemandUserApply(java.lang.String)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String updateSubDemandUserApply(String subDemandString) {
+        try {
+            SubDemand4Mod apply = StaticMethods.getDateGson().fromJson(
+                    subDemandString, SubDemand4Mod.class);
+            if (apply.getUserDemandId() != null && apply.getUserDemandId() > 0) {
+                dataManager.update(apply);
+                return SUCCESS;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+        return ERROR;
+    }
+
+    /*
+     * <p>Title: addAssess</p> <p>Description: </p>
+     * 
+     * @param addAssess
+     * 
+     * @return
+     * 
+     * @see
+     * com.sccl.serviceManager.demandManager.service.IDemandManagerService#addAssess
+     * (java.lang.String)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String addAssess(String addAssess) {
+        try {
+            DemandAssess assess = new Gson().fromJson(addAssess,
+                    DemandAssess.class);
+            if (assess != null) {
+                if (assess.getAssessID() == null || assess.getAssessID() <= 0)
+                    assess.setAssessID(null);
+                if(assess.getAssessID() != null && assess.getAssessID() > 0)
+                    dataManager.update(assess);
+                else 
+                    dataManager.add(assess);
+                return SUCCESS;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+        return ERROR;
+    }
+    
+
+    /* 
+     * <p>Title: addAssesses</p>
+     * <p>Description: </p>
+     * @param addAssesses
+     * @return
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#addAssesses(java.lang.String)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String addAssesses(String addAssesses) {
+        try {
+            List<DemandAssess> assesses = 
+                    new Gson().fromJson(addAssesses, new TypeToken<List<DemandAssess>>(){}.getType());
+            if(assesses.size() > 0 
+                    ? assesses.get(0).getAssessID() != null 
+                    && assesses.get(0).getAssessID() > 0 
+                    : false)
+                dataManager.updateBatch(assesses);
+            else
+                dataManager.addBatch(assesses);
+            return SUCCESS;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+    }
+
+    /*
+     * <p>Title: getPersonIdBySubDemandId</p> <p>Description: </p>
+     * 
+     * @param subDemandID
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * getPersonIdBySubDemandId(java.lang.String)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String getPersonIdBySubDemandId(String subDemandID) {
+        try {
+            @SuppressWarnings("rawtypes")
+            List lst = dataManager.createNativeQuery(
+                    "select mu1.person_id as sponsor "
+                            + "from ms_user mu1, T_DEMANDS_PART up "
+                            + "where mu1.user_id = up.sponsor "
+                            + "and up.USER_DEMAND_ID = " + subDemandID)
+                    .getResultList();
+
+            if (lst != null && lst.size() > 0)
+                return new Gson().toJson(lst);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+        return ERROR;
+    }
+
+    /*
+     * <p>Title: delSubDemandById</p> <p>Description: </p>
+     * 
+     * @param subDemandID
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * delSubDemandById(java.lang.String)
+     */
+    @Override
+    @Transactional
+    public String delSubDemandById(Long subDemandID) {
+        try {
+            if (subDemandID != null && subDemandID > 0) {
+                SubDemand apply = dataManager.findById(SubDemand.class,
+                        subDemandID);
+                apply.setDr(1l);
+                dataManager.update(apply);
+            }
+            return SUCCESS;
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+
+    /*
+     * <p>Title: judgeIsPMByUserId</p> <p>Description: </p>
+     * 
+     * @param personId
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * judgeIsPMByUserId(int)
+     */
+    @Override
+    public String judgeIsPMByUserId(int personId) {
+        try {
+            int userId = getUserIdByPersonId(personId);
+            @SuppressWarnings("rawtypes")
+            List lst = dataManager.createNativeQuery(
+                    "select t.user_id as userId " + "from t_system_person t "
+                            + "where t.user_status = 1 " + "and t.user_id = "
+                            + userId).getResultList();
+
+            if (lst != null && lst.size() > 0)
+                return SUCCESS;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ERROR;
+        }
+        return ERROR;
+    }
+
+    /*
+     * <p>Title: getUserIdByPersonId</p> <p>Description: </p>
+     * 
+     * @param personId
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * getUserIdByPersonId(int)
+     */
+    @Override
+    public int getUserIdByPersonId(int personId) {
+        try {
+            @SuppressWarnings("rawtypes")
+            List lst = dataManager.createNativeQuery(
+                    "select t.user_id from ms_user t " + "where t.person_id = "
+                            + personId).getResultList();
+
+            if (lst != null && lst.size() > 0)
+                return ((BigDecimal) lst.get(0)).intValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return -1;
+    }
+
+    /*
+     * <p>Title: initHomePageFast4SelectApply</p> <p>Description: </p>
+     * 
+     * @param flag
+     * 
+     * @param lines
+     * 
+     * @param pageNum
+     * 
+     * @param isCount
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * initHomePageFast4SelectApply(int, int, int, boolean)
+     */
+    @Override
+    public String initHomePageFast4SelectApply(int flag, int lines,
+            int pageNum, boolean isCount) {
+        try {
+            List<Object> reList = new ArrayList<Object>();
+
+            reList.add(queryUserAppliesByPageFastExactly4Select(flag, lines,
+                    pageNum));
+            reList.add(getPageCount(flag));
+
+            String string = StaticMethods.getDateGson().toJson(reList);
+            return string;
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+
+    /**
+     * 
+     * @Title: queryUserAppliesByPageFastExactly4Select
+     * @Description:分页查询请求单for弹窗
+     * @param flag
+     * @param pageNum
+     * @param lines
+     * @return List<HomePage> 返回类型
+     * @throws
+     */
+    private List<HomePage> queryUserAppliesByPageFastExactly4Select(int flag,
+            int pageNum, int lines) {
+        List<HomePage> applies = dataManager
+                .createQuery(
+                        "from HomePage p where  p.applyType = " + flag + " "
+                                + "and p.applyStatus > 1 "
+                                + "and p.applyStatus < 3 " + "and p.DR = 0"
+                                + " " + "order by p.userApplyCode desc",
+                        HomePage.class).setFirstResult(pageNum)
+                .setMaxResults(lines).getResultList();
+        for (HomePage homePage : applies) {
+
+            switch (homePage.getApplyStatus() != null ? homePage
+                    .getApplyStatus() : 0) {
+            case 1:
+                homePage.applyStatusStr = "未受理";
+                break;
+            case 2:
+                homePage.applyStatusStr = "处理中";
+                break;
+            case 3:
+                homePage.applyStatusStr = "完成";
+                break;
+            default:
+                homePage.applyStatusStr = "未提交";
+                break;
+            }
+
+        }
+        return applies;
+    }
+
+    private Long getPageCount(int flag) {
+        try {
+            return dataManager
+                    .createQuery(
+                            "select count(p) from HomePage p "
+                                    + "where p.DR = 0 and p.applyStatus > 1 "
+                                    + "and p.applyStatus < 3 and p.applyType = "
+                                    + flag, Long.class).getSingleResult();
+        } catch (Exception e) {
+            return Long.parseLong(ERROR);
+        }
+    }
+
+    /* 
+     * <p>Title: findSubDemandsByQueryWindow</p>
+     * <p>Description: </p>
+     * @param searchInfo
+     * @param lines
+     * @param pageNum
+     * @param isCount
+     * @return
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#findSubDemandsByQueryWindow(com.sccl.serviceManager.bugManager.dto.SearchInfoDTO, int, int, boolean)
+     */
+    @Override
+    public String findSubDemandsByQueryWindow(SearchInfoDTO searchInfo,
+            int lines, int pageNum, boolean isCount) {
+        String sql = 
+              "select * from t_demands_part ua " +
+              "where ua.dr = 0 ";
+      
+      if(searchInfo != null){
+          
+//          sql += "and ua.apply_type = " + searchInfo.getFlag() + " ";
+          if(searchInfo.getDegree() > ERROR_NUM){
+              sql += "and ua.URGENT = " + searchInfo.getDegree() + " ";
+          }
+          if(searchInfo.getRange() > ERROR_NUM){
+               sql += "and ua.RANGE = " + searchInfo.getRange() + " ";
+          }
+          if(searchInfo.getStatus() > ERROR_NUM){
+               sql += "and ua.DEMAND_STATUS = " + searchInfo.getStatus() + " ";
+          }
+          if(searchInfo.getSystem() > ERROR_NUM){
+               sql += "and ua.BELONGS_SYSTEM = " + searchInfo.getSystem() + " ";
+          }
+          if(searchInfo.getTheme() != null && !"".equals(searchInfo.getTheme().trim())){
+               sql += "and ua.DEMAND_TITLE like '%" + searchInfo.getTheme() + "%' ";
+          }
+          if(searchInfo.getSponsor() != null && !"".equals(searchInfo.getSponsor().trim())){
+               sql += "and ua.sponsor in " +
+                      "(select mu.user_id from ms_user mu " +
+                      "where mu.user_name like '%" + searchInfo.getSponsor() + "%')";
+          }
+          if(searchInfo.getStartDate() != null 
+                  && searchInfo.getEndDate() != null 
+                  && searchInfo.getStartDate().getTime() <= searchInfo.getEndDate().getTime())
+              sql += "ua.ASSIGNED_DATE >= " + searchInfo.getStartDate() + " " +
+              		"and ua.ASSIGNED_DATE <= " + searchInfo.getEndDate();
+          
+      }
+      
+      sql += " order by ua.ASSIGNED_DATE desc";
+      
+      try {
+          
+          List<Object> reList = new ArrayList<Object>();
+          
+          List<SubDemandHomePage> applies = 
+                  dataManager.createNativeQuery(sql, SubDemandHomePage.class)
+                                  .setFirstResult(pageNum).setMaxResults(lines)
+                                  .getResultList();
+          for (SubDemandHomePage subDemand : applies) {
+
+            //需求状态，0：未提交，1：需求分析，2：开发经理指派人员，3：开发，4：单元测试，5：功能测试，6：项目经理审核，7：完成
+              switch (subDemand.getDemandStatus()!=null?subDemand.getDemandStatus().intValue():0) {
+              case 1:
+                  subDemand.status = "需求分析";
+                  break;
+              case 2:
+                  subDemand.status = "开发经理指派人员";
+                  break;
+              case 3:
+                  subDemand.status = "开发";
+                  break;
+              case 4:
+                  subDemand.status = "单元测试";
+                  break;
+              case 5:
+                  subDemand.status = "功能测试";
+                  break;
+              case 6:
+                  subDemand.status = "项目经理审核";
+                  break;
+              case 7:
+                  subDemand.status = "完成";
+                  break;
+              default:
+                  subDemand.status = "未提交";
+                  break;
+              }
+          }
+          
+          reList.add(applies);
+          
+              Long count = new Long(dataManager.getCountBySql(sql));
+              reList.add(count);
+         
+          String string = StaticMethods.getDateGson().toJson(reList);
+          return string;
+          
+      } catch (Exception e) {
+          e.printStackTrace();
+          return ERROR;
+      }
+    }
+    
+    /* 
+     * <p>Title: updateDeveloperAndUnitTester</p>
+     * <p>Description: </p>
+     * @param demand_id,developer_id,unitTester_id
+     * @return
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#updateDeveloperAndUnitTester(java.lang.String)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String updateDeveloperAndUnitTester(String demand_id,int developer_id, int unitTester_id) {
+        try {
+            if(demand_id != null && !demand_id.equals("") && Integer.valueOf(demand_id) > 0){
+                String sql = "update t_demands_part t set t.DEVELOPER = " + developer_id + 
+                        ", t.UNIT_TESTER = " + unitTester_id + " where t.USER_DEMAND_ID = " + demand_id;
+                dataManager.createNativeQuery(sql).executeUpdate();
+                return SUCCESS;
+            }
+        } catch (Exception e) {
+            return ERROR;
+        }
+        return ERROR;
+    }
+    
+    /* 
+     * <p>Title: updateRealFinishDate</p>
+     * <p>Description: </p>
+     * @param developer_id,unitTester_id
+     * @return
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#updateRealFinishDate(java.lang.String)
+     */
+    @Log
+    @Override
+    @Transactional
+    public String updateRealFinishDate(String demand_id, int flag) {
+        try {
+            //0：实际需求完成时间；1：实际开发完成时间；2：实际单元测试完成时间；3：实际功能测试完成时间
+            if(demand_id != null && !demand_id.equals("") && Integer.valueOf(demand_id) > 0){
+                String realDate = "";
+                String statusString = " t.DEMAND_STATUS = ";
+                if(flag == 0){
+                    statusString = statusString + 2;
+                    realDate = "REAL_ANALYSIS_DATE";
+                }else if(flag == 1){
+                    statusString = statusString + 4;
+                    realDate = "REAL_DEVELOP_DATE";
+                }else if(flag == 2){
+                    statusString = statusString + 5;
+                    realDate = "REAL_UTEST_DATE";
+                }else if(flag == 3){
+                    statusString = statusString + 6;
+                    realDate = "REAL_FTEST_DATE";
+                }
+                String sql = "update t_demands_part t set "+ statusString +", t." + realDate + " = " + "(select sysdate from dual)" + " where t.USER_DEMAND_ID = " + demand_id;
+                dataManager.createNativeQuery(sql).executeUpdate();
+                return SUCCESS;
+            }
+        } catch (Exception e) {
+            return ERROR;
+        }
+        return ERROR;
+    }
+
+    /* 
+     * <p>Title: initDemandAssess4JobGrades</p>
+     * <p>Description: </p>
+     * @param jobGradeTypeID
+     * @param demandsLink
+     * @param userDemandID
+     * @return
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#initDemandAssess4JobGrades(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String initDemandAssess4JobGrades(String jobGradeTypeID,
+            String demandsLink, String userDemandID) {
+        try {
+            List<Object> lst = new ArrayList<Object>();
+            List<DemandAssess> demandAssesses;
+            
+            String sql = "select * from t_demands_assess t " +
+            		"where t.dr = 0 " +
+            		"and t.user_demand_id = " + userDemandID + " " +
+            				"and t.demands_link = " + demandsLink;
+            demandAssesses = 
+                    dataManager.createNativeQuery(sql, DemandAssess.class)
+                    .getResultList();
+            if(demandAssesses == null || demandAssesses.size() <= 0){
+                demandAssesses = new ArrayList<DemandAssess>();
+                List<ConstDetail> jobGrades = dataManager
+                        .createNamedQuery("findConstDetailsByTypeId",
+                                ConstDetail.class)
+                        .setParameter("constTypeId",
+                                Integer.parseInt(jobGradeTypeID.trim()))
+                        .getResultList();
+                if (jobGrades != null && jobGrades.size() > 0) {
+                    DemandAssess demandAssess = null;
+                    for (ConstDetail constDetail : jobGrades) {
+                        demandAssess = new DemandAssess();
+                        demandAssess.setIndicator(constDetail);
+                        demandAssesses.add(demandAssess);
+                    }
+                }
+                lst.add(0);
+            }else {
+                lst.add(1);
+            }
+            lst.add(demandAssesses);
+            return new Gson().toJson(lst);
+        } catch (Exception e) {
+            return ERROR;
+        }
+    }
+    
+    /*
+     * <p>Title: initJobGradesByJobType</p> <p>Description: </p>
+     * 
+     * @param jobGradeTypeID
+     * 
+     * @return
+     * 
+     * @see com.sccl.serviceManager.demandManager.service.IDemandManagerService#
+     * initJobGradesByJobType(java.lang.String)
+     */
+    @Override
+    public String initJobGradesByJobType(String jobGradeTypeID) {
+        try {
+            List<ConstDetail> jobGrades = dataManager
+                    .createNamedQuery("findConstDetailsByTypeId",
+                            ConstDetail.class)
+                    .setParameter("constTypeId",
+                            Integer.parseInt(jobGradeTypeID.trim()))
+                    .getResultList();
+            if (jobGrades != null && jobGrades.size() > 0) {
+                return new Gson().toJson(jobGrades);
+            }
+        } catch (Exception e) {
+            return ERROR;
+        }
+        return ERROR;
+    }
+}

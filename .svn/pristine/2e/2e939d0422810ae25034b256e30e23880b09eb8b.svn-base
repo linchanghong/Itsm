@@ -1,0 +1,20 @@
+db.driver.class=oracle.jdbc.driver.OracleDriver
+
+db.url=jdbc:oracle:thin:@10.206.4.55:1521:sccltest
+db.username=itsm
+db.password=itsmadmin
+
+#db.url=jdbc:oracle:thin:@localhost:1521:sunshine
+#db.username=itsm
+#db.password=oracle
+
+proxool.maxConnCount=30
+proxool.minConnCount=5
+proxool.maximumActiveTime=600000
+proxool.statistics=10s,1m,1d
+proxool.simultaneousBuildThrottle=30
+proxool.houseKeepingTestSql=select 1 from dual
+proxool.testBeforeUse=true
+proxool.trace=false
+
+

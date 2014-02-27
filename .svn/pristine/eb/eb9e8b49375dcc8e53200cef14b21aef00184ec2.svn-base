@@ -1,0 +1,447 @@
+package com.sccl.flow.vo;
+
+import java.math.BigInteger;
+
+import com.sccl.framework.entity.QueryEntity;
+
+public class ViewFlowNodeInstence extends QueryEntity {
+
+	public Long instId;
+	public Long nodeId;
+	public String nodeNumber;
+	public Integer nodeAttr;
+	public Long flowModelId;
+	public Long flowId;
+	public String moduleCode;
+	public Integer checkState;
+	public Boolean makeRubbish;
+	public String dealWithIdea;
+	public String handlerName;
+	public Long handlerId;
+	public Long moduleId;
+	public String handleDate;
+	public String nextids;
+	public String flowTitle;
+	public String other1;
+	public String other2;
+	public Integer totalFlowId;
+	public Long senderId;
+	public String senderName;
+
+	public Long senderDeptId;
+	public Long billId;
+	public Double nodeOrder;
+	public String checkStateName;
+	public String handlerLabel;
+	public String flowRoleName;
+	public Integer systemId;
+	public String flowOprtModulePath;
+	public String cpsFlowOprtModuleId;
+	public String flowOprtModuleUrl;
+	public String flowName;
+	public Long oprtTypeId;
+	public String zhuanBan;
+	public Integer isReason;
+	public Long compId;
+
+	public Integer btnTag;
+	public Integer warnTag;
+	public Integer dealWithDay;
+	public String comeDate;
+	public Boolean isNodeOneself;
+	public Boolean isNeedCheckDate;
+
+	public Double businessMoney;
+	public String subOrBgnName;
+	public String customerName;
+
+	public Long flowDeptId;
+	public String flowDeptName;
+
+	public Boolean isSubmitModify;
+
+	public Long getInstId() {
+		return instId;
+	}
+
+	public void setInstId(Long instId) {
+		this.instId = instId;
+	}
+
+	public Long getNodeId() {
+		return nodeId;
+	}
+
+	public void setNodeId(Long nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public String getNodeNumber() {
+		return nodeNumber;
+	}
+
+	public void setNodeNumber(String nodeNumber) {
+		this.nodeNumber = nodeNumber;
+	}
+
+	public Integer getNodeAttr() {
+		return nodeAttr;
+	}
+
+	public void setNodeAttr(Integer nodeAttr) {
+		this.nodeAttr = nodeAttr;
+	}
+
+	public Long getFlowModelId() {
+		return flowModelId;
+	}
+
+	public void setFlowModelId(Long flowModelId) {
+		this.flowModelId = flowModelId;
+	}
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
+	}
+
+	public String getModuleCode() {
+		return moduleCode;
+	}
+
+	public void setModuleCode(String moduleCode) {
+		this.moduleCode = moduleCode;
+	}
+
+	public Integer getCheckState() {
+		return checkState;
+	}
+
+	public void setCheckState(Integer checkState) {
+		this.checkState = checkState;
+	}
+
+	public Boolean getMakeRubbish() {
+		return makeRubbish;
+	}
+
+	public void setMakeRubbish(Boolean makeRubbish) {
+		this.makeRubbish = makeRubbish;
+	}
+
+	public String getDealWithIdea() {
+		return dealWithIdea;
+	}
+
+	public void setDealWithIdea(String dealWithIdea) {
+		this.dealWithIdea = dealWithIdea;
+	}
+
+	public String getHandlerName() {
+		return handlerName;
+	}
+
+	public void setHandlerName(String handlerName) {
+		this.handlerName = handlerName;
+	}
+
+	public Long getHandlerId() {
+		return handlerId;
+	}
+
+	public void setHandlerId(Long handlerId) {
+		this.handlerId = handlerId;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public String getHandleDate() {
+		return handleDate;
+	}
+
+	public void setHandleDate(String handleDate) {
+		this.handleDate = handleDate;
+	}
+
+	public String getNextids() {
+		return nextids;
+	}
+
+	public void setNextids(String nextids) {
+		this.nextids = nextids;
+	}
+
+	public String getFlowTitle() {
+		return flowTitle;
+	}
+
+	public void setFlowTitle(String flowTitle) {
+		this.flowTitle = flowTitle;
+	}
+
+	public String getOther1() {
+		return other1;
+	}
+
+	public void setOther1(String other1) {
+		this.other1 = other1;
+	}
+
+	public String getOther2() {
+		return other2;
+	}
+
+	public void setOther2(String other2) {
+		this.other2 = other2;
+	}
+
+	public Integer getTotalFlowId() {
+		return totalFlowId;
+	}
+
+	public void setTotalFlowId(Integer totalFlowId) {
+		this.totalFlowId = totalFlowId;
+	}
+
+	public Long getSenderId() {
+		return senderId;
+	}
+
+	public void setSenderId(Long senderId) {
+		this.senderId = senderId;
+	}
+
+	public String getSenderName() {
+		return senderName;
+	}
+
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
+	}
+
+	public Long getSenderDeptId() {
+		return senderDeptId;
+	}
+
+	public void setSenderDeptId(Long senderDeptId) {
+		this.senderDeptId = senderDeptId;
+	}
+
+	public Long getBillId() {
+		return billId;
+	}
+
+	public void setBillId(Long billId) {
+		this.billId = billId;
+	}
+	
+	public Double getNodeOrder() {
+		return nodeOrder;
+	}
+
+	public void setNodeOrder(Double nodeOrder) {
+		this.nodeOrder = nodeOrder;
+	}
+	
+	public String getCheckStateName() {
+		return checkStateName;
+	}
+
+	public void setCheckStateName(String checkStateName) {
+		this.checkStateName = checkStateName;
+	}
+
+	public String getHandlerLabel() {
+		return handlerLabel;
+	}
+
+	public void setHandlerLabel(String handlerLabel) {
+		this.handlerLabel = handlerLabel;
+	}
+
+	public String getFlowRoleName() {
+		return flowRoleName;
+	}
+
+	public void setFlowRoleName(String flowRoleName) {
+		this.flowRoleName = flowRoleName;
+	}
+
+	public Integer getSystemId() {
+		return systemId;
+	}
+
+	public void setSystemId(Integer systemId) {
+		this.systemId = systemId;
+	}
+
+	public String getFlowOprtModulePath() {
+		return flowOprtModulePath;
+	}
+
+	public void setFlowOprtModulePath(String flowOprtModulePath) {
+		this.flowOprtModulePath = flowOprtModulePath;
+	}
+
+	public String getCpsFlowOprtModuleId() {
+		return cpsFlowOprtModuleId;
+	}
+
+	public void setCpsFlowOprtModuleId(String cpsFlowOprtModuleId) {
+		this.cpsFlowOprtModuleId = cpsFlowOprtModuleId;
+	}
+
+	public String getFlowOprtModuleUrl() {
+		return flowOprtModuleUrl;
+	}
+
+	public void setFlowOprtModuleUrl(String flowOprtModuleUrl) {
+		this.flowOprtModuleUrl = flowOprtModuleUrl;
+	}
+
+	public String getFlowName() {
+		return flowName;
+	}
+
+	public void setFlowName(String flowName) {
+		this.flowName = flowName;
+	}
+
+	public Long getOprtTypeId() {
+		return oprtTypeId;
+	}
+
+	public void setOprtTypeId(Long oprtTypeId) {
+		this.oprtTypeId = oprtTypeId;
+	}
+
+	public String getZhuanBan() {
+		return zhuanBan;
+	}
+
+	public void setZhuanBan(String zhuanBan) {
+		this.zhuanBan = zhuanBan;
+	}
+
+	public Integer getIsReason() {
+		return isReason;
+	}
+
+	public void setIsReason(Integer isReason) {
+		this.isReason = isReason;
+	}
+
+	public Long getCompId() {
+		return compId;
+	}
+
+	public void setCompId(Long compId) {
+		this.compId = compId;
+	}
+
+	public Integer getBtnTag() {
+		return btnTag;
+	}
+
+	public void setBtnTag(Integer btnTag) {
+		this.btnTag = btnTag;
+	}
+
+	public Integer getWarnTag() {
+		return warnTag;
+	}
+
+	public void setWarnTag(Integer warnTag) {
+		this.warnTag = warnTag;
+	}
+
+	public Integer getDealWithDay() {
+		return dealWithDay;
+	}
+
+	public void setDealWithDay(Integer dealWithDay) {
+		this.dealWithDay = dealWithDay;
+	}
+
+	public String getComeDate() {
+		return comeDate;
+	}
+
+	public void setComeDate(String comeDate) {
+		this.comeDate = comeDate;
+	}
+
+	public Boolean getIsNodeOneself() {
+		return isNodeOneself;
+	}
+
+	public void setIsNodeOneself(Boolean isNodeOneself) {
+		this.isNodeOneself = isNodeOneself;
+	}
+
+	public Boolean getIsNeedCheckDate() {
+		return isNeedCheckDate;
+	}
+
+	public void setIsNeedCheckDate(Boolean isNeedCheckDate) {
+		this.isNeedCheckDate = isNeedCheckDate;
+	}
+
+	public Double getBusinessMoney() {
+		return businessMoney;
+	}
+
+	public void setBusinessMoney(Double businessMoney) {
+		this.businessMoney = businessMoney;
+	}
+
+	public String getSubOrBgnName() {
+		return subOrBgnName;
+	}
+
+	public void setSubOrBgnName(String subOrBgnName) {
+		this.subOrBgnName = subOrBgnName;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	public Long getFlowDeptId() {
+		return flowDeptId;
+	}
+
+	public void setFlowDeptId(Long flowDeptId) {
+		this.flowDeptId = flowDeptId;
+	}
+
+	public String getFlowDeptName() {
+		return flowDeptName;
+	}
+
+	public void setFlowDeptName(String flowDeptName) {
+		this.flowDeptName = flowDeptName;
+	}
+
+	public Boolean getIsSubmitModify() {
+		return isSubmitModify;
+	}
+
+	public void setIsSubmitModify(Boolean isSubmitModify) {
+		this.isSubmitModify = isSubmitModify;
+	}
+
+}

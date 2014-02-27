@@ -1,0 +1,757 @@
+package com.sccl.serviceManager.bugManager.api;
+
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import org.springframework.flex.remoting.RemotingDestination;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.sccl.flow.vo.DataInteraction;
+import com.sccl.framework.api.FrameAPI;
+import com.sccl.framework.common.tools.StaticMethods;
+import com.sccl.serviceManager.bugManager.dto.SearchInfoDTO;
+import com.sccl.serviceManager.bugManager.entity.UserApplyAdd;
+import com.sccl.serviceManager.bugManager.service.IBugManagerService;
+import com.sun.jersey.api.core.InjectParam;
+
+/**
+ * 
+ * @ProjectName:Itsm
+ * @Package:com.sccl.serviceManager.bugManager.facade.BugManagerAPI.java
+ * @ClassName: BugManagerAPI
+ * @Description: 服务器端与界面的交互类
+ * @author:Howie_Mark
+ * @UpdateUser:blue_sky
+ * @UpdateDate:2013-7-26
+ * @UpdateRemark:[The content of this revision]
+ * @See:[Related classes and methods]
+ * @Since:[Product template version]
+ * @date 2013-7-26 下午2:37:01
+ * @Version:v1.0
+ */
+@RemotingDestination
+@Component("bugManagerAPI")
+//@Path(value = "/itsm/bugManager")
+@Path(value = "/frame/bug")
+public class BugManagerAPI extends FrameAPI {
+    
+    @InjectParam private IBugManagerService bugManagerService;
+    
+    
+    /**
+     * 
+     * @Title: initHomePage
+     * @Description:bugMnager主页的数据初始化，需要分页，默认显示20条
+     * @param flag
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/home/page/bugORquestion/{flag}")
+    @Produces(value = {"application/json"})
+    public String initHomePage(@PathParam(value = "flag") int flag) {
+         return bugManagerService.initHomePage(flag);
+     }
+    
+    /**
+     * 
+     * @Title: initHomePage
+     * @Description:bug管理界面的分页表格所使用
+     * @param flag 2：bug，1：问题
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @param isCount 是否返回总行数
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/bugORquestion/homePage/{flag}/{lines}/{pageNum}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String initHomePage(@PathParam(value = "flag") int flag, 
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "pageNum") int pageNum, 
+            @PathParam(value = "isCount") boolean isCount) {
+        String homeString = bugManagerService.initHomePage(flag, lines, pageNum, isCount);
+        return homeString;
+     }
+    
+    /**
+     * 
+     * @Title: initHomePageFast
+     * @Description:初始化主界面表格__优化
+     * @param flag
+     * @param lines
+     * @param pageNum
+     * @param isCount
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/bugORquestion/homePageFast/{flag}/{lines}/{pageNum}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String initHomePageFast(@PathParam(value = "flag") int flag, 
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "pageNum") int pageNum, 
+            @PathParam(value = "isCount") boolean isCount) {
+        String homeString = bugManagerService.initHomePageFast(flag, lines, pageNum, isCount);
+        return homeString;
+     }
+    
+    
+    
+    /**
+     * 
+     * @Title: getPersonIdByApplyId
+     * @Description:通过请求单id查询出该请求单的填写人(person)id
+     * @param userId
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/bugORquestion//{applyId}")
+    @Produces(value = {"application/json"})
+    public String getPersonIdByApplyId(
+            @PathParam(value = "userId") int userId){
+        return bugManagerService.getPersonIdByApplyId(userId);
+    }
+    
+//    /**
+//     * 
+//     * @Title: initAttachments
+//     * @Description:请求单查看、修改界面的文档表格分页
+//     * @param userApplyID 请求单id
+//     * @param lines 每页显示多少行
+//     * @param pageNum 第几页
+//     * @param isCount 是否返回总行数
+//     * @return 
+//     * @retunType:String      返回类型
+//     * @throws:
+//     */
+//    @GET
+//    @Path(value = "/init/bugORquestion/attachmentsPage/{userApplyID}/{lines}/{pageNum}/{isCount}")
+//    @Produces(value = {"application/json"})
+//    public String initAttachments(@PathParam(value = "userApplyID") String userApplyID, 
+//            @PathParam(value = "lines") int lines, 
+//            @PathParam(value = "pageNum") int pageNum, 
+//            @PathParam(value = "isCount") boolean isCount){
+//        return bugManagerService.initAttachments(userApplyID, pageNum, lines, isCount);
+//    }
+    
+    /**
+     * 
+     * @Title: queryUserAppliesByPage
+     * @Description:bugManager主页的分页插叙
+     * @param flag 判断是查询bug还是question
+      * @param lines 每页显示多少条数据
+      * @param pageNum 需要第几页数据
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/page/bugORquestion/{flag}/{lines}/{pageNum}")
+    @Produces(value = {"application/json"})
+    public String queryUserAppliesByPage(@PathParam(value = "flag") int flag, 
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "pageNum") int pageNum) {
+        return bugManagerService.queryUserAppliesByPage(flag, lines, pageNum);
+     }
+    
+    /**
+     * 
+     * @Title: querUserAppliesByLike
+     * @Description:bugManager页面的主页模糊查询
+     * @param type bug还是问题
+     * @param flag 查询标志值，这里传的是页面传过来的数值标志值：0-按编号，1-按所属系统，
+     *             2-主题摘要，3-重要程度，4-影响范围，5-报告人，6-责任人，7-状态
+     *             如果有这么多条件，请调用本类的私有方法
+     * @param queryStr 用户所输入的查询内容
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/like/page/bugORquestion/like/" +
+    		"{type}/{flag}/{queryStr}/{lines}/{pageNum}")
+    @Produces(value = {"application/json"})
+    public String querUserAppliesByLike(
+            @PathParam(value = "type") int type, 
+            @PathParam(value = "flag") int flag, 
+            @PathParam(value = "queryStr") String queryStr, 
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "pageNum") int pageNum) {
+        return bugManagerService
+                .querUserAppliesByLike(type, flag, queryStr, lines, pageNum);
+    }
+    
+    /**
+     * 
+     * @Title: querUserAppliesByLike
+     * @Description:bug管理界面的模糊查询
+     * @param type bug还是问题
+     * @param flag 查询标志值
+     * @param queryStr 查询内容
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @param isCount 是否返回总行数
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/like/page/bugORquestion/like/" +
+            "{type}/{flag}/{queryStr}/{lines}/{pageNum}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String querUserAppliesByLike(
+            @PathParam(value = "type") int type, 
+            @PathParam(value = "flag") int flag, 
+            @PathParam(value = "queryStr") String queryStr, 
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "pageNum") int pageNum,
+            @PathParam(value = "isCount") boolean isCount) {
+        String string = bugManagerService
+                .querUserAppliesByLike(type, flag, queryStr, lines, pageNum, isCount);
+        return string;
+    }
+     
+     /**
+      * 
+      * @Title: showUserApllyByID
+      * @Description:通过一个请求单ID查询一个请求单的相关信息（包括其对应的文档）
+      * @param applyIDStr
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @GET
+    @Path(value = "/userApply/id/{userApplyId}")
+    @Produces(value = {"application/json"})
+     public String showUserApllyByID(
+             @PathParam(value = "userApplyId") Long applyIDStr){
+        return bugManagerService.showUserApllyByID(applyIDStr);
+    }
+    
+    /**
+     * 
+     * @Title: showUserApllyByCode
+     * @Description:通过一个请求单编码查询一个请求单的相关信息（包括其对应的文档）
+     * @param userApplyCode
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+   @GET
+   @Path(value = "/userApply/code/{userApplyCode}")
+   @Produces(value = {"application/json"})
+    public String showUserApllyByCode(
+            @PathParam(value = "userApplyCode") String userApplyCode){
+       return bugManagerService.showUserApllyByCode(userApplyCode);
+   }
+   
+   /**
+    * 
+    * @Title: findAllApplyCodes
+    * @Description:就是为了不再另外创建一张表的前提下构建code
+    * @return 
+    * @retunType:String      返回类型
+    * @throws:
+    */
+  @GET
+  @Path(value = "/userApply/codes/{type}")
+  @Produces(value = {"application/json"})
+   public String findAllApplyCodes(
+           @PathParam(value = "type") int type){
+      return bugManagerService.findAllApplyCodes(type);
+  }
+     
+     /**
+      * 
+      * @Title: initBugSource
+      * @Description:bugManager增、删、改页面的bug来源下拉单初始化
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @GET
+    @Path(value = "/bugSources")
+    @Produces(value = {"application/json"})
+    public String initBugSource() {
+        return bugManagerService.initBugSource();
+    }
+     
+     /**
+      * 
+      * @Title: initBugScope
+      * @Description:bugManager增、删、改页面的bug影响范围下拉单初始化
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @GET
+    @Path(value = "/bugScopes")
+    @Produces(value = {"application/json"})
+    public String initBugScope() {
+        return bugManagerService.initBugScope();
+    }
+     
+     /**
+      * 
+      * @Title: initLevels
+      * @Description:bugManager增、删、改页面的bug重要程度下拉单初始化
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @GET
+    @Path(value = "/levels")
+    @Produces(value = {"application/json"})
+    public String initLevels() {
+        return bugManagerService.initLevels();
+    }
+     
+     /**
+      * 
+      * @Title: initSupportSystems
+      * @Description:bugManager增、删、改页面的所属系统下拉单初始化
+      * @return 
+      * @retunType:List<SupportSystem>      返回类型
+      * @throws:
+      */
+    @GET
+    @Path(value = "systems")
+    @Produces(value = {"application/json"})
+    public String initSupportSystems() {
+        return bugManagerService.initSupportSystems();
+    }
+     
+     /**
+      * 
+      * @Title: initSystemModules
+      * @Description:bugManager增、删、改页面的所属业务下拉单初始化
+      * @param systemId
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @GET
+    @Path(value = "/systemModules/system/{systemId}")
+    @Produces(value = {"application/json"})
+    public String initSystemModules(@PathParam(value = "systemId") int systemId) {
+        return bugManagerService.initSystemModules(systemId);
+    }
+     
+    /**
+     * 
+     * @Title: addUerApply
+     * @Description:新增请求
+     * @param userApplyJson
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @POST
+    @Path(value = "/userApply/add")
+    @Transactional
+     public String addBugUserApply(String userApplyJson){
+        Gson gson = StaticMethods.getDateGson();
+//        Gson gson = new Gson();
+//        List<StringMap<Object>> list = gson.fromJson(userApplyJson, new TypeToken<List<StringMap<Object>>>(){}.getType());
+        Long type = (long) -2;
+        
+        UserApplyAdd apply = null;
+        try {
+            apply = gson.fromJson(userApplyJson, UserApplyAdd.class);
+            String compId = apply.getApplyEntry().companyID.toString().trim();
+            String personId = apply.getApplyEntry().personId.toString().trim();
+            
+            type = bugManagerService.addBugUserApply(apply, compId, personId);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+//        } catch (InstantiationException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+        }
+        
+        DataInteraction di = new DataInteraction();
+        di.setType(type.intValue());
+        return gson.toJson(di);
+    }
+    
+    /**
+     * 
+     * @Title: addUerApply
+     * @Description:新增请求
+     * @param userApplyJson
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @POST
+    @Path(value = "/userApply/addProblem")
+    @Transactional
+     public String addProblemUserApply(String userApplyJson){
+        Gson gson = StaticMethods.getDateGson();
+//        Gson gson = new Gson();
+//        List<StringMap<Object>> list = gson.fromJson(userApplyJson, new TypeToken<List<StringMap<Object>>>(){}.getType());
+        Long type = (long) -2;
+        
+        UserApplyAdd apply = null;
+        try {
+            apply = gson.fromJson(userApplyJson, UserApplyAdd.class);
+            String compId = apply.getApplyEntry().companyID.toString().trim();
+            String personId = apply.getApplyEntry().personId.toString().trim();
+            
+            type = bugManagerService.addProblemUserApply(apply, compId, personId);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+//        } catch (InstantiationException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+        }
+        
+        DataInteraction di = new DataInteraction();
+        di.setType(type.intValue());
+        return gson.toJson(di);
+    }
+    
+    
+    
+    /**
+     * 
+     * @Title: updateUerApply
+     * @Description:修改请求
+     * @param userApplyJson
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+   @POST
+   @Path(value = "/userApply/update")
+   @Transactional
+    public String updateBugUerApply(String userApplyJson){
+       return bugManagerService.updateBugUerApply(userApplyJson);
+   }
+     
+   /**
+    * 
+    * @Title: updateBugUerApplyAdd
+    * @Description:再次呈报页面的数据存储
+    * @param userApplyAddJson
+    * @return 
+    * @retunType:String      返回类型
+    * @throws:
+    */
+   @POST
+   @Path(value = "/userApply/update/bugUerApplyAdd")
+   @Transactional
+    public String updateBugUerApplyAdd(String userApplyAddJson){
+       return bugManagerService.updateBugUerApplyAdd(userApplyAddJson);
+   }
+   
+   /**
+    * 
+    * @Title: updateUerApplyStatus
+    * @Description:修改请求单的状态
+    * @param applyID
+    * @param status
+    * @return 
+    * @retunType:String      返回类型
+    * @throws:
+    */
+  @POST
+  @Path(value = "/userApply/update/{applyID}/{status}")
+  @Transactional
+   public String updateUerApplyStatus(
+           @PathParam(value = "applyID") Long applyID, 
+           @PathParam(value = "status") int status){
+      return bugManagerService.updateUerApplyStatus(applyID,status);
+  }
+  
+  /**
+   * 
+   * @Title: updateUerApplyStatusNoDataBack
+   * @Description:修改请求单的状态
+   * @param applyID
+   * @param status
+   * @return 
+   * @retunType:String      返回类型
+   * @throws:
+   */
+ @POST
+ @Path(value = "/userApply/update/{applyID}/{status}/noUserApplyBack")
+ @Transactional
+  public String updateUerApplyStatusNoDataBack(
+          @PathParam(value = "applyID") Long applyID, 
+          @PathParam(value = "status") int status){
+     return bugManagerService.updateUerApplyStatusNoDataBack(applyID,status);
+ }
+   
+   
+   /**
+    * 
+    * @Title: updateUerApply
+    * @Description:修改请求
+    * @param userApplyJson
+    * @return 
+    * @retunType:String      返回类型
+    * @throws:
+    */
+  @POST
+  @Path(value = "/userApply/addOrUpdate")
+  @Transactional
+   public String addOrUpdateUerApply(String userApplyJson){
+      return bugManagerService.addOrUpdateUerApply(userApplyJson);
+  }
+   
+     /**
+      * 
+      * @Title: delUserApplyByID
+      * @Description:根据请求单的id删除该请求单--将DR设置为1
+      * @param applyID
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @DELETE
+    @Transactional
+    @Path(value = "/userApply/id/{userApplyId}")
+    public String delUserApplyById(
+            @PathParam(value = "userApplyId") Long userApplyId) {
+        return bugManagerService.delUserApplyByID(userApplyId);
+    }
+     
+     /**
+      * 
+      * @Title: delUserApply
+      * @Description:根据传回的请求单对象删除--将DR设置为1
+      * @param userApplyJson
+      * @return 
+      * @retunType:String      返回类型
+      * @throws:
+      */
+    @DELETE
+    @Transactional
+    @Path(value = "/userApply/id")
+     public String delUserApply(String userApplyJson){
+         return bugManagerService.delUserApply(userApplyJson);
+     }
+     
+//     /**
+//      * 
+//      * @Title: delAttachmentById
+//      * @Description:根据传入的文档ID删除相应的文档,更新表格信息
+//      * @param attachmentId
+//      * @param userApplyId
+//      * @return 
+//      * @retunType:String      返回类型
+//      * @throws:
+//      */
+//    @DELETE
+//    @Transactional
+//    @Path(value = "/attachment/id/{attachmentId}/{userApplyId}")
+//     public String delAttachmentById(
+//             @PathParam(value = "attachmentId") String attachmentId, 
+//             @PathParam(value = "userApplyId") Long userApplyId){
+//        return bugManagerService.delAttachmentById(attachmentId, userApplyId);
+//    }
+
+//     /**
+//      * 
+//      * @Title: delAttachment
+//      * @Description:根据传回的文档对象删除
+//      * @param attachmentJson
+//      * @return 
+//      * @retunType:String      返回类型
+//      * @throws:
+//      */
+//    @DELETE
+//    @Transactional
+//    @Path(value = "/attachment/id")
+//     public String delAttachment(String attachmentJson){
+//        return bugManagerService.delAttachment(attachmentJson);
+//    }
+     
+//    /**
+//     * 
+//     * @Title: saveAttachment
+//     * @Description:保存上传文档
+//     * @param attachmentJson
+//     * @return 
+//     * @retunType:String      返回类型
+//     * @throws:
+//     */
+//    @POST
+//    @Path(value = "/attachment/saveORUpdate")
+//    @Transactional
+//     public String saveAttachment(String attachmentJson){
+//        return bugManagerService.saveAttachment(attachmentJson);
+//    }
+    
+    /**
+     * 
+     * @Title: initDropDownList4AddPage
+     * @Description:从数据库传回数据初始化Add界面的相关值
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/DropDownList4AddPage")
+    @Produces(value = {"application/json"})
+    public String initDropDownList4AddPage(){
+        return bugManagerService.initDropDownList4AddPage();
+    }
+    
+    /**
+     * 
+     * @Title: findUserAppliesByQueryWindow
+     * @Description:用户自定义查询请求单
+     * @param searchInfo 查询条件对象json数组
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @param isCount 是否返回总行数
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/query/window/{searchInfo}/{pageNum}/{lines}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String findUserAppliesByQueryWindow(
+//            @ModelAttribute("searchInfo") @Valid SearchInfoDTO searchInfo, 
+            @PathParam(value = "searchInfo") String searchInfoJson,
+            @PathParam(value = "pageNum") int pageNum, 
+            @PathParam(value = "lines") int lines,
+            @PathParam(value = "isCount") boolean isCount){
+        SearchInfoDTO searchInfo = 
+            StaticMethods.getDateGson().fromJson(searchInfoJson, SearchInfoDTO.class);
+        String applies = bugManagerService.findUserAppliesByQueryWindow(searchInfo, pageNum, lines, isCount);
+        return applies;
+    }
+    
+    
+    /*
+     * 
+     * @Title: setReplyer
+     * @Description:在用户shu
+     * @param biilId
+     * @param userId
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @POST
+    @Path(value = "/flow/agree1st/replyer")
+    @Produces(value = {"application/json"})
+    public String setReplyer(String biilId, int userId, String planFinishDateStr){
+        return bugManagerService.setReplyer(biilId, userId, planFinishDateStr);
+    }
+    
+    /**
+     * 
+     * @Title: agreeBugUserApplyFlow1st
+     * @Description:第一次审批同意
+     * @param billId
+     * @param userId
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @POST
+    @Path(value = "/flow/agree1st")
+    @Produces(value = {"application/json"})
+    public String agreeBugUserApplyFlow1st(String billId){
+        return bugManagerService.agreeBugUserApplyFlow1st(billId);
+    }
+    
+    /**
+     * 
+     * @Title: disagreeBugUserApplyFlow1st
+     * @Description:第一次审批不同意
+     * @param billId
+     * @param userId
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @POST
+    @Path(value = "/flow/disagree1st")
+    @Produces(value = {"application/json"})
+    public String disagreeBugUserApplyFlow1st(String billId){
+        return bugManagerService.disagreeBugUserApplyFlow1st(billId);
+    }
+    
+    
+     
+    
+  //======================================================================================
+  //自己修改的后台方法：
+    /**
+     * 
+     * @Title: initMyHomePageFast
+     * @Description:初始化主界面表格__优化
+     * @param flag
+     * @param lines
+     * @param pageNum
+     * @param isCount
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/init/bugORquestion/homePageFast/{lines}/{pageNum}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String initMyHomePageFast(@PathParam(value = "lines") int lines, 
+            @PathParam(value = "pageNum") int pageNum, 
+            @PathParam(value = "isCount") boolean isCount) {
+        String homeString = bugManagerService.initMyHomePageFast(lines, pageNum, isCount);
+        return homeString;
+     }
+ 
+    /**
+     * 
+     * @Title: findMyUserAppliesByQueryWindow
+     * @Description:用户自定义查询请求单
+     * @param searchInfo 查询条件对象json数组
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @param isCount 是否返回总行数
+     * @return 
+     * @retunType:String      返回类型
+     * @throws:
+     */
+    @GET
+    @Path(value = "/query/Mywindow/{searchInfo}/{pageNum}/{lines}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String findMyUserAppliesByQueryWindow(
+            @PathParam(value = "searchInfo") String searchInfoJson,
+            @PathParam(value = "pageNum") int pageNum, 
+            @PathParam(value = "lines") int lines,
+            @PathParam(value = "isCount") boolean isCount){
+        SearchInfoDTO searchInfo = 
+            StaticMethods.getDateGson().fromJson(searchInfoJson, SearchInfoDTO.class);
+        String applies = bugManagerService.findMyUserAppliesByQueryWindow(searchInfo, pageNum, lines, isCount);
+        return applies;
+    }
+    
+    //========================================================================================
+}

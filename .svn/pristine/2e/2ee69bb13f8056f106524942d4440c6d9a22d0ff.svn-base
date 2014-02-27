@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="Itsm"
+  id="myeclipse.1374047577584"
+  context-root="/itsm"
+  j2ee-spec="6.0"
+  archive="Itsm.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

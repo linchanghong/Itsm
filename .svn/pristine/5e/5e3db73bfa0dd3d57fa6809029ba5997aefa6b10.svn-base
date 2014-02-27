@@ -1,0 +1,92 @@
+/**
+ * @Title: AnalyzesAPI.java
+ * @Package com.sccl.analyzes.api
+ * @Description: TODO-
+ * @author Howie_Mark   
+ * @date 2013-9-15 下午3:38:33
+ * @version:V1.0 
+ */
+package com.sccl.analyzes.api;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import org.springframework.flex.remoting.RemotingDestination;
+import org.springframework.stereotype.Component;
+
+import com.sccl.analyzes.service.IAnalyzesService;
+import com.sccl.serviceManager.bugManager.service.IBugManagerService;
+import com.sun.jersey.api.core.InjectParam;
+
+/**
+ * @ProjectName:Itsm
+ * @Package:com.sccl.analyzes.api.AnalyzesAPI.java
+ * @ClassName: AnalyzesAPI
+ * @Description: TODO-
+ * @author:Howie_Mark
+ * @UpdateUser:blue_sky
+ * @UpdateDate:2013-9-15
+ * @UpdateRemark:[The content of this revision]
+ * @See:[Related classes and methods]
+ * @Since:[Product template version]
+ * @date 2013-9-15 下午3:38:33
+ * @Version:v1.0
+ */
+@RemotingDestination
+@Component("analyzesAPI")
+@Path(value = "/frame/analyzes")
+public class AnalyzesAPI {
+
+    @InjectParam private IAnalyzesService analyzesService;
+    
+    /**
+     * 
+     * @Title: initWorkloadDatas
+     * @Description:加载工作量表格数据
+     * @param queryMonth 查询参数:第几月
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @param isCount 是否分页
+     * @param orderBy 排序列名
+     * @return String        返回类型
+     * @throws
+     */
+    @GET
+    @Path(value = "/initWorkload/{queryMonth}/{orderBy}/{pageNum}/{lines}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String initWorkloadDatas(@PathParam(value = "queryMonth") int queryMonth, 
+            @PathParam(value = "orderBy") String orderBy,
+            @PathParam(value = "pageNum") int pageNum,
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "isCount") boolean isCount) {
+        String homeString = analyzesService.initWorkloadDatas(queryMonth, lines, pageNum, isCount, orderBy);
+        return homeString;
+     }
+    
+    /**
+     * 
+     * @Title: initProblemDatas
+     * @Description:加载问题处理情况表格数据
+     * @param queryMonth 查询参数:第几月
+     * @param lines 每页显示多少行
+     * @param pageNum 第几页
+     * @param isCount 是否分页
+     * @param orderBy 排序列名
+     * @return String        返回类型
+     * @throws
+     */
+    @GET
+    @Path(value = "/initProblem/{queryMonth}/{orderBy}/{pageNum}/{lines}/{isCount}")
+    @Produces(value = {"application/json"})
+    public String initProblemDatas(@PathParam(value = "queryMonth") int queryMonth, 
+            @PathParam(value = "orderBy") String orderBy,
+            @PathParam(value = "pageNum") int pageNum,
+            @PathParam(value = "lines") int lines, 
+            @PathParam(value = "isCount") boolean isCount) {
+        String homeString = analyzesService.initProblemDatas(queryMonth, lines, pageNum, isCount, orderBy);
+        return homeString;
+     }
+    
+}

@@ -1,0 +1,151 @@
+package com.sccl.flow.service;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
+import com.sccl.flow.entity.FlowRole;
+import com.sccl.flow.entity.FlowRoleUsers;
+import com.sccl.flow.vo.ViewFlowRoleUsers;
+import com.sccl.framework.DataManager;
+
+@Component("flowRoleService")
+public class FlowRoleService implements IFlowRoleService {
+	
+	private DataManager dataManager;
+
+	public DataManager getDataManager() {
+		return dataManager;
+	}
+
+	@Resource(name = "dataManager")
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+	}
+	
+	/**
+	 * 查询全部流程角色以及用户
+	 * @param json 查询条件 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public List<ViewFlowRoleUsers> getAllRoleAndUser(String where, String orderby) {
+		if(where==null || where.equals("")) where="1=1";
+		if(orderby==null || orderby.equals("")) orderby="FlowRoleID asc, RoleUserID asc";
+		String sql="select * from VIEW_FLOWROLEUSERS t where "+where+" order by "+orderby;
+		//String sql="select * from VIEW_FLOWROLEUSERS t order by "+orderby;
+		
+		List<ViewFlowRoleUsers> list = (List<ViewFlowRoleUsers>)dataManager.nativeQuery(sql, ViewFlowRoleUsers.class);
+		return list;
+	}
+	
+	/**
+	 * 查询角色信息
+	 * @param flowRoleName 角色名
+	 * @param compId 公司ID
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private FlowRole getByName(String flowRoleName, String compId) {
+		List<FlowRole> list = dataManager.createQuery(FlowRole.class).queryWhere("FlowRoleName='" + flowRoleName + "' and compId=" + compId).list();
+
+		return list.size() == 1 ? (FlowRole) list.get(0) : null;
+	}
+	
+	/**
+	 * 添加角色
+	 * @param flowRole 角色信息
+	 * return
+	 */
+	public int addRole(FlowRole flowRole){
+		FlowRole tempRole = getByName(flowRole.getFlowRoleName(), flowRole.getCompId());
+		if (tempRole == null) {
+			dataManager.add(flowRole);
+			return 1;
+		} else
+			return 0;
+	}
+	
+	/**
+	 * 修改角色
+	 * @param flowRole 角色信息
+	 * return
+	 */
+	public int updateRole(FlowRole flowRole){
+		try {
+			dataManager.update(flowRole);
+			return 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+	
+	/**
+	 * 查询角色用户
+	 * @param userid
+	 * @param flowRoleID
+	 * @param roleUserID
+	 * @param newORmodi
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private FlowRoleUsers getById(String userid, String flowRoleID, Long roleUserID, boolean newORmodi){
+        String where = "flowRoleID='"+flowRoleID+"' and UserId='" + userid+"'";
+        if (!newORmodi)
+        	where += " and RoleUserID != '" + roleUserID+"'";
+        
+        List<FlowRoleUsers> list= (List<FlowRoleUsers>)dataManager.createQuery(FlowRoleUsers.class).queryWhere(where).list();
+        
+        return list.size()>0?(FlowRoleUsers)list.get(0):null;
+    }
+	
+	/**
+	 * 给角色添加用户
+	 * @param json 用户信息
+	 * @return
+	 */
+	public int addRoleUsers(FlowRoleUsers flowRoleUsers){
+		FlowRoleUsers tempfUser = getById(flowRoleUsers.getUserID(), flowRoleUsers.getFlowRoleID(), null, true);
+        if (tempfUser == null){
+       	 	dataManager.add(flowRoleUsers);
+            return 1;
+        }
+        else return 0;
+	}
+	
+	/**
+	 * 修改角色用户
+	 * @param flowRoleUsers 角色用户
+	 * @return
+	 */
+	public int updateRoleUsers(FlowRoleUsers flowRoleUsers){
+		
+		FlowRoleUsers tempfUser = getById(flowRoleUsers.getUserID(), flowRoleUsers.getFlowRoleID(),flowRoleUsers.getRoleUserID(), false);
+        if (tempfUser == null){
+        	dataManager.update(flowRoleUsers);
+            return 1;
+        }
+        
+		return 0;
+	}
+	
+	/**
+	 * 删除角色下面用户
+	 * @param id 角色用户ID
+	 * @return
+	 */
+	public boolean deleteRoleUsers(Long id){
+		try{
+			dataManager.deleteById(FlowRoleUsers.class, id);
+			return true;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+	}
+}

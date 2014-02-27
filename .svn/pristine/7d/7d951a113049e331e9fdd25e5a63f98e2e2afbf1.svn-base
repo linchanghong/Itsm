@@ -1,0 +1,146 @@
+package com.sccl.serviceManager.bugManager.entity;
+
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.sccl.framework.entity.TableEntity;
+
+@XmlRootElement
+@Entity
+@Table(name = "MS_USER", schema = "ITSM")
+public class User extends TableEntity implements java.io.Serializable {
+
+
+	/**
+     * @Description: TODO-
+     */
+    private static final long serialVersionUID = -8615145409534135496L;
+    private Integer id;
+    private String userName;
+    private String userCode;
+    private String password;
+	
+	//0业务员，只操作本机构的业务；1业务管理员，可操作本机构及管理机构的业务，拥有部分系统设置权限；2管理员，默认可分配所有权限，拥有所有系统设置权限，但没有业务权限；
+	private Integer isAdmin; 
+	private Integer isEnable;
+	private String loginUid;// 登录串，唯一区别一次登录，用于单用户登录
+	private Integer isSingleLogin; //是否单用户登录
+//	private Date createtime;
+	private String remark;
+	private String email;
+//	private MsPerson msPerson;
+//	private String manageDepartment;
+//	private List<Organization> organizations; //如果是管理员，可管理的机构
+//	private List<MsRole> msRoles;
+
+	public String companyID;
+	
+	public String personId; 
+	
+	
+
+    public User() {
+	}
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GEN_CUS_USERS")
+	@SequenceGenerator(name = "GEN_CUS_USERS", sequenceName = "SEQ_FRAME", allocationSize = 1)
+	@Column(name = "USER_ID", nullable = false)
+	public Integer getId() {
+		return this.id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	@Column(name = "USER_NAME", length = 40, nullable = false)
+	public String getUserName() {
+		return this.userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	@Column(name = "USER_CODE", length = 20, nullable = false)
+	public String getUserCode() {
+		return this.userCode;
+	}
+
+	public void setUserCode(String userCode) {
+		this.userCode = userCode;
+	}
+
+	@Column(name = "PASSWORD", length = 40, nullable = false)
+	public String getPassword() {
+		return this.password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Column(name = "IS_ENABLE", nullable = false)
+	public Integer getIsEnable() {
+		return this.isEnable;
+	}
+
+	public void setIsEnable(Integer isEnable) {
+		this.isEnable = isEnable;
+	}
+
+	@Column(name = "LOGIN_UID", length = 40, nullable = false)
+	public String getLoginUid() {
+		return this.loginUid;
+	}
+
+	public void setLoginUid(String loginUid) {
+		this.loginUid = loginUid;
+	}
+
+	@Column(name = "IS_SINGLE_LOGIN")
+	public Integer getIsSingleLogin() {
+		return isSingleLogin;
+	}
+
+	public void setIsSingleLogin(Integer isSingleLogin) {
+		this.isSingleLogin = isSingleLogin;
+	}
+
+	@Column(name = "REMARK", length = 200)
+	public String getRemark() {
+		return this.remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	@Column(name = "EMAIL", length = 100)
+	public String getEmail() {
+		return this.email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+
+	@Column(name = "IS_ADMIN")
+	public Integer getIsAdmin() {
+		return isAdmin;
+	}
+
+	public void setIsAdmin(Integer isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+	
+}

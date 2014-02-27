@@ -1,0 +1,66 @@
+package com.sccl.framework.common.tools;
+
+import java.sql.Timestamp;
+import java.text.DateFormat;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sccl.framework.entity.ConstType;
+import com.sccl.framework.entity.MenuButton;
+import com.sccl.framework.entity.MsRole;
+import com.sccl.framework.entity.Organization;
+import com.sccl.framework.entity.SetType;
+import com.sccl.framework.vo.ConstTree;
+import com.sccl.framework.vo.MenuButtonTree;
+import com.sccl.framework.vo.MsRoleTree;
+import com.sccl.framework.vo.OrgTree;
+import com.sccl.framework.vo.SetTree;
+import com.sccl.itsm.report.entity.ProjectPlan;
+import com.sccl.itsm.report.service.ProjectPlanTree;
+
+public class StaticMethods {
+	
+	public static MenuButtonTree toMenuButtonTree(MenuButton menuButton) {
+		Gson gson = getExposeGson();
+		String menuJson = gson.toJson(menuButton);
+		MenuButtonTree menuButtonTree = gson.fromJson(menuJson, MenuButtonTree.class);
+		return menuButtonTree;
+	}
+	
+	public static ProjectPlanTree toProjectPlanTree(ProjectPlan projectPlan) {
+		Gson gson = getExposeGson();
+		String projectJson = gson.toJson(projectPlan);
+		ProjectPlanTree projectPlanTree = gson.fromJson(projectJson, ProjectPlanTree.class);
+		return projectPlanTree;
+	}
+	
+	public static MsRoleTree toMsRoleTree(MsRole msRole) {
+		Gson gson = getExposeGson();
+		String roleJson = gson.toJson(msRole);
+		return gson.fromJson(roleJson, MsRoleTree.class);
+	}
+	
+	public static ConstTree toConstTree(ConstType consType) {
+		return new Gson().fromJson(consType.toJson(), ConstTree.class);
+	}
+	
+	public static SetTree toSetTree(SetType setTyoe) {
+		return new Gson().fromJson(setTyoe.toJson(), SetTree.class);
+	}
+	
+	public static OrgTree toOrgTree(Organization organization) {
+		return new Gson().fromJson(organization.toJson(), OrgTree.class);
+	}
+	
+	public static Gson getExposeGson() {
+		return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
+	}
+	
+	public static Gson getDateGson(){
+		GsonBuilder builder = new GsonBuilder();
+		builder.enableComplexMapKeySerialization(); //支持Map的key为复杂对象的形式  
+		builder.setDateFormat("yyyy-MM-dd");
+		builder.registerTypeAdapter(Timestamp.class, new DateTimeDeserializer());
+		return builder.create();
+	}
+}

@@ -1,0 +1,139 @@
+package com.sccl.flow.api;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.flex.remoting.RemotingDestination;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.sccl.flow.entity.FlowRoleUsers;
+import com.sccl.flow.service.IFlowRoleService;
+import com.sccl.flow.vo.DataInteraction;
+import com.sccl.flow.vo.ViewFlowRoleUsers;
+import com.sccl.framework.utils.Tools;
+
+@Component("flowRole")
+@RemotingDestination
+public class FlowRole{
+	
+	public IFlowRoleService flowRoleService;
+
+	public IFlowRoleService getFlowRoleService() {
+		return flowRoleService;
+	}
+
+	@Resource(name = "flowRoleService")
+	public void setFlowRoleService(IFlowRoleService flowRoleService) {
+		this.flowRoleService = flowRoleService;
+	}
+	
+	/**
+	 * 查询全部流程角色
+	 * @param json 查询条件 
+	 * @return
+	 */
+	public String getAllRole(String json){
+		Gson gson = Tools.getGson();
+		DataInteraction di = gson.fromJson(json, DataInteraction.class);
+		List<ViewFlowRoleUsers> list = flowRoleService.getAllRoleAndUser(di.getWhere(), di.getOrderby());
+//		TargetStrategy ts = new TargetStrategy(ViewFlowRoleUsers.class);
+//		ts.setFields(new String[]{"FlowRoleID", "FlowRoleName", "Effective"});
+//		ts.setReverse(true);
+//		gson = new GsonBuilder().setExclusionStrategies(ts).registerTypeAdapterFactory(HibernateProxyTypeAdapter.FACTORY).create();  
+		json=gson.toJson(list);
+		return json;
+	}
+	
+	/**
+	 * 查询全部流程角色以及用户
+	 * @param json 查询条件 
+	 * @return
+	 */
+	public String getAllRoleAndUser(String json){
+		Gson gson = Tools.getGson();
+		DataInteraction di = gson.fromJson(json, DataInteraction.class);
+		List<ViewFlowRoleUsers> list = flowRoleService.getAllRoleAndUser(di.getWhere(), di.getOrderby());
+		json = gson.toJson(list);
+		return json;
+    }
+	
+	/**
+	 * 添加流程角色
+	 * @param json 角色信息
+	 * @return 
+	 */
+	@Transactional
+	public String addRole(String json){
+
+		Gson gson = Tools.getGson();
+		DataInteraction di = new DataInteraction();
+		com.sccl.flow.entity.FlowRole flowRole = gson.fromJson(json, com.sccl.flow.entity.FlowRole.class);
+		di.setType(flowRoleService.addRole(flowRole));
+		
+		return gson.toJson(di);
+	}
+	
+	/**
+	 * 修改流程角色
+	 * @param json 角色信息
+	 * @return 
+	 */
+	@Transactional
+	public String updateRole(String json){
+
+		Gson gson = Tools.getGson();
+		DataInteraction di = new DataInteraction();
+		com.sccl.flow.entity.FlowRole flowRole = gson.fromJson(json, com.sccl.flow.entity.FlowRole.class);
+		di.setType(flowRoleService.updateRole(flowRole));
+		
+		return gson.toJson(di);
+	}
+	
+	/**
+	 * 给角色添加用户
+	 * @param json 用户信息
+	 * @return
+	 */
+	@Transactional
+	public String addRoleUsers(String json){
+		Gson gson = Tools.getGson();
+		DataInteraction di = new DataInteraction();
+		FlowRoleUsers flowRoleUsers = gson.fromJson(json, FlowRoleUsers.class);
+		di.setType(flowRoleService.addRoleUsers(flowRoleUsers));
+		
+		return gson.toJson(di);
+	}
+	
+	/**
+	 * 修改角色下用户
+	 * @param json 用户信息
+	 * @return
+	 */
+	@Transactional
+	public String updateRoleUsers(String json){
+		Gson gson = Tools.getGson();
+		DataInteraction di = new DataInteraction();
+		FlowRoleUsers flowRoleUsers = gson.fromJson(json, FlowRoleUsers.class);
+		di.setType(flowRoleService.updateRoleUsers(flowRoleUsers));
+		
+		return gson.toJson(di);
+	}
+	
+	/**
+	 * 删除角色下用户
+	 * @param json 用户ID
+	 * @return
+	 */
+	@Transactional
+	public String deleteRoleUsers(String json){
+		Gson gson = Tools.getGson();
+		DataInteraction di = new DataInteraction();
+		FlowRoleUsers flowRoleUsers = gson.fromJson(json, FlowRoleUsers.class);
+		di.setResult(flowRoleService.deleteRoleUsers(flowRoleUsers.getRoleUserID()));
+		
+		return gson.toJson(di);
+	}
+}

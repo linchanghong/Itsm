@@ -1,0 +1,83 @@
+package com.sccl.itsm.assessManager.api;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import org.springframework.flex.remoting.RemotingDestination;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.sccl.flow.vo.DataInteraction;
+import com.sccl.framework.common.tools.StaticMethods;
+import com.sccl.itsm.assessManager.entity.WorkReport;
+import com.sccl.itsm.assessManager.service.IWorkReportService;
+import com.sun.jersey.api.core.InjectParam;
+
+@SuppressWarnings("all")
+@RemotingDestination
+@Component("workReportManagerAPI")
+@Path(value = "/itsm/assessManager/workReportManagerAPI")
+public class WorkReportManagerAPI {
+	
+	@InjectParam private IWorkReportService workReportService;
+	
+	@Transactional
+	@POST
+	@Path(value = "/addKnowledgeInfo")
+	public String addWorkReport(String workReportJson){
+		Gson gson = StaticMethods.getDateGson();
+		Long type = (long) -2;
+		WorkReport workReport=null;
+		
+		try {
+			workReport = gson.fromJson(workReportJson, WorkReport.class);
+            String compId = workReport.getReporter().companyID.toString().trim();
+            String personId = workReport.getReporter().personId.toString().trim();
+            //System.out.println(workReport);
+            type = workReportService.addWorkReport(workReport, compId, personId);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        
+		DataInteraction di = new DataInteraction();
+	    di.setType(type.intValue());
+	    return gson.toJson(di);
+	}
+	
+	@Transactional
+	@POST
+	@Path(value = "/updateWorkReport")
+	public Long updateWorkReport(String workReportJson){
+		return workReportService.updateWorkReport(workReportJson);
+	}
+	
+	@Transactional
+	public String deleteWorkReport(String workReportId){
+		return workReportService.deleteWorkReport(workReportId);
+	}
+	
+	@Transactional
+	public String statusWorkReport(String workReportId,String status){
+		return workReportService.statusWorkReport(workReportId, status);
+	}
+	
+	@GET
+    @Path(value = "/findAllWorkReportPage/query/{searchInfo}/{pageNum}/{lines}/{isCount}")
+    @Produces(value = {"application/json"})
+	public String findAllWorkReportPage(@PathParam(value = "sqlWhere") String sqlWhere,@PathParam(value = "first") int first,
+			@PathParam(value = "size") int size, @PathParam(value = "isCount") boolean isCount){
+		return workReportService.findAllWorkReportPage(sqlWhere, first, size, isCount);
+	}
+	
+	@GET
+	@Path(value = "/findWorkReportById/id/{workReportId}")
+	@Produces(value = {"application/json"})
+	public String findWorkReportById(@PathParam(value = "workReportId") String workReportId){
+		return workReportService.findWorkReportById(workReportId);
+	}
+
+}

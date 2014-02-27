@@ -1,0 +1,215 @@
+package com.sccl.serviceManager.knowledgeManager.service;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sccl.flow.common.FlowTools;
+import com.sccl.framework.DataManager;
+import com.sccl.framework.common.tools.StaticMethods;
+import com.sccl.framework.service.log.Log;
+import com.sccl.serviceManager.knowledgeManager.entity.KnowledgeInfo;
+
+@Component("knowledgeInfoService")
+public class KnowledgeInfoService implements IKnowledgeInfoService {
+
+	private DataManager dataManager;
+
+	public DataManager getDataManager() {
+		return dataManager;
+	}
+
+	@Resource
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+	}
+	
+	@Log
+	@Transactional
+	public Long addKnowledgeInfo(KnowledgeInfo knowledgeInfo,String compId, String personId) {
+
+		try {
+			FlowTools tools = FlowTools.getInstence();
+			tools.setDataManager(dataManager);
+			Long oprtTypeID = Long.valueOf("5");
+			Long flowModelId=tools.getFlowModelId(oprtTypeID, Long.valueOf(compId));
+			if(flowModelId==-1){
+				return (long) -1;
+			}else if(flowModelId==0){
+				return (long) 0;
+			}else{
+				dataManager.add(knowledgeInfo);
+				Long billID = Long.valueOf(knowledgeInfo.getId());
+				String flowTitle = "知识审批流程："+knowledgeInfo.getKnowledgeTitle();
+				tools.savaFlowInstence(oprtTypeID, flowModelId, billID, personId, flowTitle);
+			}
+			return (long) knowledgeInfo.getId();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return (long) -2;
+	}
+
+	@Transactional
+	@Log
+	public String addKnowledgeInfos(String knowledgeInfosJson) {
+		try {
+			Type knowledgeInfoType = new TypeToken<List<KnowledgeInfo>>() {}.getType();
+			List<KnowledgeInfo> knowledgeInfos = new Gson().fromJson(knowledgeInfosJson, knowledgeInfoType);
+			Iterator<KnowledgeInfo> iter = knowledgeInfos.iterator();
+			while (iter.hasNext()) {
+				KnowledgeInfo knowledgeInfo = (KnowledgeInfo) iter.next();
+				
+				dataManager.add(knowledgeInfo);
+			}
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+	@Transactional
+	@Log
+	public Long updateKnowledgeInfo(String knowledgeInfoJson) {
+		try {
+			KnowledgeInfo knowledgeInfo = StaticMethods.getDateGson().fromJson(knowledgeInfoJson, KnowledgeInfo.class);
+			dataManager.update(knowledgeInfo);
+			return knowledgeInfo.getId();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return (long) 0;
+		}
+	}
+
+	@Transactional
+	@Log
+	public String updateKnowledgeInfos(String knowledgeInfosJson) {
+		try {
+			Type knowledgeInfoType = new TypeToken<List<KnowledgeInfo>>() {}.getType();
+			List<KnowledgeInfo> knowledgeInfos = new Gson().fromJson(knowledgeInfosJson, knowledgeInfoType);
+			Iterator<KnowledgeInfo> iter = knowledgeInfos.iterator();
+			while (iter.hasNext()) {
+				KnowledgeInfo knowledgeInfo = (KnowledgeInfo) iter.next();
+				dataManager.update(knowledgeInfo);
+			}
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+	@Transactional
+	@Log
+	public String deleteKnowledgeInfoById(String knowledgeInfoId) {
+		try {
+			dataManager.deleteById(KnowledgeInfo.class, Long.parseLong(knowledgeInfoId));
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+	@Transactional
+	@Log
+	public String deleteKnowledgeInfoByIds(String knowledgeInfoIds) {
+		try {
+			Long[] ids = new Gson().fromJson(knowledgeInfoIds, Long[].class);
+			dataManager.deleteByIdBatch(KnowledgeInfo.class, ids);
+			return "1";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+	@Log
+	public String findKnowledgeInfoById(String knowledgeInfoId) {
+		try {
+			return StaticMethods.getDateGson().toJson(dataManager.findById(KnowledgeInfo.class, Long.parseLong(knowledgeInfoId)));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+	@Log
+	public String findKnowledgeInfoByUserId(String userId) {
+		try {
+			KnowledgeInfo knowledgeInfo = dataManager.createNamedQuery("findKnowledgeInfoByUserId", KnowledgeInfo.class).setParameter("userId", userId).getSingleResult();
+			return StaticMethods.getDateGson().toJson(knowledgeInfo);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+	
+	@Transactional
+	@Log
+	public String deleteKnowledgeInfo(String knowledgeInfoId){
+		try{
+			Long id=Long.parseLong(knowledgeInfoId);
+			dataManager.createNamedQuery("KnowledgeInfo.delete").setParameter("id", id).executeUpdate();
+			return "1";
+		}catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+	
+	@Transactional
+	@Log
+	public String examineKnowledgeInfo(String knowledgeInfoId,String examine) {
+		try{
+			Long id=Long.parseLong(knowledgeInfoId);
+			int examineId=Integer.parseInt(examine);
+			dataManager.createNamedQuery("KnowledgeInfo.examine").setParameter("examineId",examineId).setParameter("id", id).executeUpdate();
+			return "1";
+		}catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Log
+	public String findAllKnowledgeInfoPage(String sqlWhere,int first, int size, boolean isCount) {
+		try {
+			List<Object> reList = new ArrayList<Object>();
+			String whereStr=" where p.dr=0";
+			if(sqlWhere!=null && !sqlWhere.equals("")){
+				whereStr+=sqlWhere;
+			}
+			//List<KnowledgeInfo> knowledgeInfo = dataManager.createQuery("select p from KnowledgeInfo p"+whereStr+" order by p.id", KnowledgeInfo.class).setFirstResult(first).setMaxResults(size).getResultList();
+			List<KnowledgeInfo> knowledgeInfo = dataManager.createNativeQuery("select p.* from t_knowledge_info p "+whereStr+" order by p.knowledge_id", KnowledgeInfo.class).setFirstResult(first).setMaxResults(size).getResultList();
+			
+			for(KnowledgeInfo k:knowledgeInfo){
+				k.examineName=k.getIsExamine()==0?"未审核":(k.getIsExamine()==1?"已审核":"流程中");
+			}
+			
+			reList.add(0, knowledgeInfo);
+			if(isCount) {
+				//Long count = dataManager.createQuery("select count(p) from KnowledgeInfo p "+whereStr, Long.class).getSingleResult();
+				
+				reList.add(1, knowledgeInfo.size());
+			}
+			
+			//return StaticMethods.getExposeGson().toJson(reList);
+			return StaticMethods.getDateGson().toJson(reList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "0";
+		}
+	}
+
+}
